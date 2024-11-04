@@ -66,6 +66,41 @@ app.layout = html.Div([
         html.Div(id='upload-status', style={'margin-top': '10px', 'color': 'green'})
     ], id='file-upload', style={'display': 'none'}),
 
+    # Date range picker for dynamic time selection
+    html.Div([
+        html.Label("Select Date Range"),
+        dcc.DatePickerRange(
+            id='date-picker-range',
+            display_format='YYYY-MM-DD',
+            start_date_placeholder_text="Start Date",
+            end_date_placeholder_text="End Date"
+        ),
+    ], style={'margin': '20px'}),
+
+    # Dropdown for activity filters (e.g., Steps and Calories)
+    html.Div([
+        html.Label("Filter by Steps"),
+        dcc.Dropdown(
+            id='steps-filter',
+            options=[
+                {'label': 'Low Activity (< 2000 Steps)', 'value': 'low'},
+                {'label': 'Moderate Activity (2000-5000 Steps)', 'value': 'moderate'},
+                {'label': 'High Activity (> 5000 Steps)', 'value': 'high'}
+            ],
+            placeholder="Select Step Range"
+        ),
+        html.Label("Filter by Calories"),
+        dcc.Dropdown(
+            id='calories-filter',
+            options=[
+                {'label': 'Low Burn (< 300 Calories)', 'value': 'low'},
+                {'label': 'Moderate Burn (300-600 Calories)', 'value': 'moderate'},
+                {'label': 'High Burn (> 600 Calories)', 'value': 'high'}
+            ],
+            placeholder="Select Calorie Range"
+        ),
+    ], style={'margin': '20px'}),
+
     # Dropdown to select the metric
     html.Div([
         dcc.Dropdown(
@@ -226,15 +261,19 @@ def handle_data_sources(fetch_clicks, upload_contents, email, password, data_sou
     else:
         raise PreventUpdate
 
-# Callback to update the graph based on selected metric and data source
+# Callback to update the graph based on date range, activity filters, and selected metric
 @app.callback(
     Output("activity-graph", "figure"),
     [
         Input("metric-dropdown", "value"),
-        Input('stored-data', 'data')
+        Input('stored-data', 'data'),
+        Input('date-picker-range', 'start_date'),
+        Input('date-picker-range', 'end_date'),
+        Input('steps-filter', 'value'),
+        Input('calories-filter', 'value')
     ]
 )
-def update_graph(selected_metric, data):
+def update_graph(selected_metric, data, start_date, end_date, steps_filter, calories_filter):
     if data is None:
         return {
             "data": [],
@@ -257,12 +296,31 @@ def update_graph(selected_metric, data):
     if not pd.api.types.is_datetime64_any_dtype(df['Date']):
         df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
-    # Drop rows with invalid dates
-    df = df.dropna(subset=['Date'])
+    # Apply date range filter
+    if start_date and end_date:
+        mask = (df['Date'] >= start_date) & (df['Date'] <= end_date)
+        df = df.loc[mask]
+
+    # Apply steps filter
+    if steps_filter == 'low':
+        df = df[df['Steps'] < 2000]
+    elif steps_filter == 'moderate':
+        df = df[(df['Steps'] >= 2000) & (df['Steps'] <= 5000)]
+    elif steps_filter == 'high':
+        df = df[df['Steps'] > 5000]
+
+    # Apply calories filter
+    if calories_filter == 'low':
+        df = df[df['Calories'] < 300]
+    elif calories_filter == 'moderate':
+        df = df[(df['Calories'] >= 300) & (df['Calories'] <= 600)]
+    elif calories_filter == 'high':
+        df = df[df['Calories'] > 600]
 
     # Sort by Date
     df = df.sort_values('Date')
 
+    # Plot the filtered data
     fig = px.line(df, x="Date", y=selected_metric, markers=True, title=f"{selected_metric} per Day")
     fig.update_layout(xaxis_title="Date", yaxis_title=selected_metric)
     fig.update_xaxes(tickangle=45)
