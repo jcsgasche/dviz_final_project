@@ -19,7 +19,7 @@ def main():
 
         # activities = client.get_activities_fordate("2024-08-01")
         activities = client.get_activities(0,30)
-        with open('data/activities.json', 'w') as json_file:
+        with open('../activities.json', 'w') as json_file:
             json.dump(activities, json_file, indent=4)
             logging.info('Activities saved to activities.json\n')
 

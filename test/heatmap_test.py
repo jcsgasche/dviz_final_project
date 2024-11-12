@@ -4,7 +4,7 @@ import dash
 from dash import dcc, html
 
 # Lade die CSV-Daten (ersetze den Dateipfad durch den tatsächlichen Pfad)
-data = pd.read_csv('data/JanickSteffen_2024-09.csv')
+data = pd.read_csv('../data/JanickSteffen_2024-09.csv')
 
 # Auswahl relevanter Spalten für die beiden Analysen
 activity_stress_columns = [
