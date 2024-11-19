@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import calendar
 
 # Load activity data
-with open('../data/activities.json', 'r') as f:
+with open('../../data/activities.json', 'r') as f:
     data = json.load(f)
 
 # Convert JSON data to a pandas DataFrame
@@ -77,20 +77,25 @@ def update_chart(selected_metric, start_date, end_date, n_clicks, relayout_data,
     mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
     filtered_df = df.loc[mask]
 
-    # Determine bar colors based on the goal
-    bar_colors = [
-        'green' if value >= goal_value else 'red'
-        for value in filtered_df[selected_metric]
-    ]
+    # Split data into "Goal Reached" and "Goal Not Reached"
+    goal_reached = filtered_df[filtered_df[selected_metric] >= goal_value]
+    goal_not_reached = filtered_df[filtered_df[selected_metric] < goal_value]
 
-    # Create figure with bars for actual values
+    # Create figure with bars for "Goal Reached" and "Goal Not Reached"
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
-        x=filtered_df['startTimeLocal'],
-        y=filtered_df[selected_metric],
-        marker_color=bar_colors,
-        name='Actual'
+        x=goal_reached['startTimeLocal'],
+        y=goal_reached[selected_metric],
+        marker_color='green',
+        name='Goal Reached'  # Legend entry for "Goal Reached"
+    ))
+
+    fig.add_trace(go.Bar(
+        x=goal_not_reached['startTimeLocal'],
+        y=goal_not_reached[selected_metric],
+        marker_color='red',
+        name='Goal Not Reached'  # Legend entry for "Goal Not Reached"
     ))
 
     # Add a line for the goal across the entire date range
@@ -116,7 +121,6 @@ def update_chart(selected_metric, start_date, end_date, n_clicks, relayout_data,
     )
 
     return fig
-
 
 # Run app
 if __name__ == '__main__':
