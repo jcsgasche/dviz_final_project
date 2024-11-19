@@ -1,0 +1,148 @@
+Muscle Group;Exercise;Reps;Sets
+Chest;BENCH_PRESS;23;3
+Chest;PUSH_UP;15;1
+Core;SIT_UP;17;1
+Biceps;CURL;9;1
+Mid Delts;LATERAL_RAISE;27;3
+Triceps;TRICEPS_EXTENSION;18;2
+Undefined;UNKNOWN;5;1
+Upperback;ROW;56;4
+Chest;BENCH_PRESS;56;6
+Triceps;TRICEPS_EXTENSION;7;1
+Upperback;PULL_UP;16;2
+Undefined;UNKNOWN;30;4
+Upperback;ROW;11;1
+Quadriceps;SQUAT;48;5
+Chest;BENCH_PRESS;11;2
+Chest;PUSH_UP;28;3
+Mid Delts;LATERAL_RAISE;16;1
+Undefined;UNKNOWN;3;1
+Upperback;ROW;19;2
+Chest;BENCH_PRESS;49;4
+Core;SIT_UP;41;2
+Chest;PUSH_UP;7;1
+Biceps;CURL;26;2
+Mid Delts;LATERAL_RAISE;45;5
+Upperback;PULL_UP;33;4
+Undefined;UNKNOWN;5;1
+Upperback;ROW;8;1
+Quadriceps;SQUAT;6;1
+Chest;PUSH_UP;51;3
+Upperback;PULL_UP;29;4
+Undefined;UNKNOWN;11;2
+Chest;BENCH_PRESS;53;6
+Core;SIT_UP;13;2
+Upperback;ROW;46;5
+Undefined;UNKNOWN;5;1
+Chest;BENCH_PRESS;43;5
+Core;SIT_UP;48;5
+Triceps;TRICEPS_EXTENSION;26;2
+Mid Delts;LATERAL_RAISE;29;3
+Biceps;CURL;10;1
+Chests;FLYE;7;1
+Upperback;ROW;16;2
+Undefined;UNKNOWN;3;1
+Quadriceps;SQUAT;13;1
+Lowerback;DEADLIFT;10;1
+Chest;BENCH_PRESS;31;4
+Chest;PUSH_UP;37;3
+Core;SIT_UP;36;3
+Mid Delts;LATERAL_RAISE;20;2
+Upperback;PULL_UP;20;2
+Undefined;UNKNOWN;13;2
+Upperback;ROW;7;1
+Chest;BENCH_PRESS;54;5
+Core;SIT_UP;17;1
+Quadriceps;SQUAT;68;6
+Chest;BENCH_PRESS;39;5
+Core;SIT_UP;32;2
+Chest;PUSH_UP;8;1
+Biceps;CURL;39;3
+Upperback;PULL_UP;7;1
+Undefined;UNKNOWN;27;4
+Upperback;ROW;20;2
+Chest;BENCH_PRESS;9;1
+Core;SIT_UP;63;5
+Triceps;TRICEPS_EXTENSION;10;1
+Mid Delts;LATERAL_RAISE;87;6
+Undefined;UNKNOWN;24;2
+Chest;BENCH_PRESS;64;7
+Core;SIT_UP;64;5
+Chest;PUSH_UP;8;1
+Mid Delts;LATERAL_RAISE;9;1
+Upperback;ROW;54;5
+Quadriceps;SQUAT;8;1
+Chest;BENCH_PRESS;79;8
+Core;SIT_UP;11;1
+Biceps;CURL;15;1
+Mid Delts;LATERAL_RAISE;42;4
+Chests;FLYE;9;1
+Upperback;ROW;30;4
+Quadriceps;SQUAT;7;1
+Chest;BENCH_PRESS;22;3
+Core;SIT_UP;77;8
+Chest;PUSH_UP;34;2
+Mid Delts;LATERAL_RAISE;20;2
+Upperback;PULL_UP;29;3
+Undefined;UNKNOWN;21;3
+Upperback;ROW;7;1
+Quadriceps;SQUAT;31;3
+Chest;BENCH_PRESS;15;2
+Core;SIT_UP;34;3
+Triceps;TRICEPS_EXTENSION;5;1
+Upperback;PULL_UP;7;1
+Chests;FLYE;12;1
+Upperback;ROW;60;7
+Chest;BENCH_PRESS;63;5
+Mid Delts;LATERAL_RAISE;4;1
+Upperback;PULL_UP;23;2
+Undefined;UNKNOWN;15;1
+Upperback;ROW;8;1
+Quadriceps;SQUAT;64;5
+Chest;BENCH_PRESS;55;6
+Core;SIT_UP;12;1
+Mid Delts;LATERAL_RAISE;8;1
+Chests;FLYE;20;2
+Undefined;UNKNOWN;12;2
+Chest;BENCH_PRESS;25;3
+Quadriceps;SQUAT;55;4
+Chest;BENCH_PRESS;16;2
+Core;SIT_UP;33;4
+Chest;PUSH_UP;45;3
+Mid Delts;LATERAL_RAISE;34;4
+Biceps;CURL;51;4
+Triceps;TRICEPS_EXTENSION;15;1
+Undefined;UNKNOWN;46;3
+Upperback;ROW;41;4
+Quadriceps;SQUAT;8;1
+Chest;BENCH_PRESS;31;5
+Chest;PUSH_UP;32;3
+Mid Delts;LATERAL_RAISE;18;2
+Biceps;CURL;25;3
+Chests;FLYE;25;4
+Upperback;ROW;56;5
+Undefined;UNKNOWN;13;2
+Quadriceps;SQUAT;22;2
+Chest;BENCH_PRESS;27;3
+Core;SIT_UP;5;1
+Upperback;PULL_UP;28;3
+Chests;FLYE;5;1
+Undefined;UNKNOWN;11;1
+Upperback;ROW;5;1
+Quadriceps;SQUAT;39;3
+Chest;BENCH_PRESS;39;5
+Core;SIT_UP;49;4
+Mid Delts;LATERAL_RAISE;52;4
+Chests;FLYE;9;1
+Upperback;ROW;33;4
+Chest;BENCH_PRESS;43;4
+Core;SIT_UP;10;1
+Biceps;CURL;14;1
+Mid Delts;LATERAL_RAISE;18;2
+Chests;FLYE;19;3
+Upperback;ROW;69;5
+Undefined;UNKNOWN;11;2
+Quadriceps;SQUAT;64;5
+Lowerback;DEADLIFT;6;1
+Chest;BENCH_PRESS;44;5
+Upperback;ROW;39;3
