@@ -59,13 +59,19 @@ app.layout = html.Div([
     [Input('metric-selector', 'value'),
      Input('date-range', 'start_date'),
      Input('date-range', 'end_date'),
-     Input('set-goal-button', 'n_clicks')],
+     Input('set-goal-button', 'n_clicks'),
+     Input('line-chart', 'relayoutData')],  # Add relayoutData as an Input
     [State('goal-input', 'value')]
 )
-def update_chart(selected_metric, start_date, end_date, n_clicks, goal_value):
+def update_chart(selected_metric, start_date, end_date, n_clicks, relayout_data, goal_value):
     # Set default goal value for initial load if goal_value is None
     if goal_value is None or n_clicks == 0:
         goal_value = 500  # Default goal for initial load
+
+    # Check if relayout_data contains a zoomed range
+    if relayout_data and 'xaxis.range[0]' in relayout_data and 'xaxis.range[1]' in relayout_data:
+        start_date = relayout_data['xaxis.range[0]'][:10]  # Extract date part
+        end_date = relayout_data['xaxis.range[1]'][:10]    # Extract date part
 
     # Filter data by date range
     mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
