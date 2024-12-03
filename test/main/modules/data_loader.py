@@ -1,41 +1,63 @@
-import json
+
+# modules/data_loader.py
 import pandas as pd
+import json
+import io
+import base64
 from garminconnect import Garmin
 
-def load_data(json_path):
-    """Load data from a local JSON file."""
-    with open(json_path, 'r') as f:
-        data = json.load(f)
-    df = pd.DataFrame(data)
-    df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
-    return df.to_dict(orient='records')
-
-def fetch_garmin_data(email, password):
-    """Fetch data from Garmin."""
+def fetch_garmin_data(username, password):
     try:
-        client = Garmin(email, password)
+        client = Garmin(username, password)
         client.login()
         activities = client.get_activities(0, 30)
 
         activity_data = {
-            "Date": [],
-            "Steps": [],
-            "Calories": [],
-            "Distance_km": [],
-            "Avg_HeartRate": [],
+            "startTimeLocal": [],
+            'steps': [],
+            'calories': [],
+            "distance": [],
+            "averageHR": [],
         }
 
         for activity in activities:
-            activity_data["Date"].append(activity["startTimeLocal"])
-            activity_data["Steps"].append(activity.get("steps", 0))
-            activity_data["Calories"].append(activity.get("calories", 0))
-            activity_data["Distance_km"].append(activity.get("distance", 0) / 1000)
-            activity_data["Avg_HeartRate"].append(activity.get("averageHR", 0))
+            activity_data['startTimeLocal'].append(activity["startTimeLocal"])
+            activity_data['steps'].append(activity.get('steps', 0))
+            activity_data['calories'].append(activity.get('calories', 0))
+            activity_data['distance'].append(activity.get("distance", 0) / 1000)
+            activity_data['averageHR'].append(activity.get("averageHR", 0))
 
         df = pd.DataFrame(activity_data)
-        df['Date'] = pd.to_datetime(df['Date'])
-        return df.to_dict(orient='records')
-
+        return df, "Data fetched successfully from Garmin."
     except Exception as e:
         print(f"Error fetching Garmin data: {e}")
-        return None
+        return pd.DataFrame(), f"Error fetching data: {e}"
+
+def process_uploaded_file(contents, filename):
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+
+    try:
+        if 'json' in filename.lower():
+            data = json.load(io.BytesIO(decoded))
+            df = pd.DataFrame(data)
+        elif 'csv' in filename.lower():
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename.lower():
+            df = pd.read_excel(io.BytesIO(decoded))
+        else:
+            return None, "Unsupported file format. Please upload a JSON, CSV, or Excel file."
+
+        required_columns = {"startTimeLocal", 'steps', 'calories', "distance", "averageHR"}
+        missing_columns = required_columns - set(df.columns)
+        if missing_columns:
+            return None, f"Missing required columns: {', '.join(missing_columns)}"
+
+        df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'], errors='coerce')
+        if df['startTimeLocal'].isnull().any():
+            return None, "Invalid date format in 'startTimeLocal' column."
+
+        return df, f"File '{filename}' processed successfully."
+
+    except Exception as e:
+        return None, f"Error processing file: {e}"

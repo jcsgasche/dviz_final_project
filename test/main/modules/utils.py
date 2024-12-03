@@ -1,12 +1,8 @@
-import pandas as pd
+# modules/utils.py
+from datetime import datetime, timedelta
 
-def validate_columns(df, required_columns):
-    """Validate if the required columns exist in the DataFrame."""
-    missing = required_columns - set(df.columns)
-    if missing:
-        raise ValueError(f"Missing columns: {', '.join(missing)}")
-
-def format_dates(df, date_column):
-    """Ensure the date column is in datetime format."""
-    df[date_column] = pd.to_datetime(df[date_column], errors='coerce')
-    return df
+def calculate_date_range():
+    today = datetime.today()
+    first_day_last_month = (today.replace(day=1) - timedelta(days=1)).replace(day=1)
+    last_day_last_month = today.replace(day=1) - timedelta(days=1)
+    return first_day_last_month, last_day_last_month
