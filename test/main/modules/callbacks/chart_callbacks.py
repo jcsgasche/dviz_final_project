@@ -3,7 +3,7 @@ from dash import Input, Output, State
 import pandas as pd
 from modules.charts.barchart import create_activity_chart
 
-def register_chart_callbacks(app):
+def register_barchart_callbacks(app):
     @app.callback(
         Output('activity-graph', 'figure'),
         [Input('metric-selector', 'value'),

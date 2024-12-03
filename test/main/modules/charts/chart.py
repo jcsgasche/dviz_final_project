@@ -11,10 +11,10 @@ def create_chart_layout(first_day_last_month, last_day_last_month):
 
         html.Div([
             dcc.RadioItems(
-                id='data-source',
+                id='data-source-chart',
                 options=[
                     {'label': 'Fetch from Garmin lolool', 'value': 'garmin'},
-                    {'label': 'Upload Local Dataset', 'value': 'upload'}
+                    {'label': 'Upload Local Dataset Jackson', 'value': 'upload'}
                 ],
                 value='garmin',
                 labelStyle={'display': 'inline-block', 'margin-right': '20px'}
