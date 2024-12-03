@@ -16,12 +16,19 @@ def main():
         client = Garmin(email, password)
         client.login()
         logging.info('Logged in to Garmin Connect\n')
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        raise ConnectionError
 
+    try:
         # activities = client.get_activities_fordate("2024-08-01")
         activities = client.get_activities(0,30)
-        with open('../activities.json', 'w') as json_file:
+        with open('../activities_2.json', 'w') as json_file:
             json.dump(activities, json_file, indent=4)
             logging.info('Activities saved to activities.json\n')
+    except Exception as e:
+        logging.error(f"An error2 occurred: {e}")
+        raise ConnectionError
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")

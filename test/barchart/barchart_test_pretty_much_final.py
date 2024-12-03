@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import calendar
 
 # Load activity data
-with open('../../data/activities.json', 'r') as f:
+with open('./data/activities.json', 'r') as f:
     data = json.load(f)
 
 # Convert JSON data to a pandas DataFrame
