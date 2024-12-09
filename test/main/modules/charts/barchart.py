@@ -3,7 +3,6 @@ from dash import dcc, html, Input, Output, State
 import plotly.graph_objects as go
 import pandas as pd
 import dash
-from dash.exceptions import PreventUpdate
 
 def create_barchart_layout(first_day_last_month, last_day_last_month):
     return html.Div([
@@ -68,9 +67,41 @@ def create_metric_controls(first_day_last_month, last_day_last_month):
         dcc.Dropdown(
             id='metric-selector',
             options=[
+                # Basic Metrics
                 {'label': 'Calories', 'value': 'calories'},
                 {'label': 'Steps', 'value': 'steps'},
-                {'label': 'Duration', 'value': 'duration'}
+                {'label': 'Duration (minutes)', 'value': 'duration'},
+
+                # Heart Rate Metrics
+                {'label': 'Average Heart Rate', 'value': 'averageHR'},
+                {'label': 'Maximum Heart Rate', 'value': 'maxHR'},
+                {'label': 'Aerobic Training Effect', 'value': 'aerobicTrainingEffect'},
+                {'label': 'Anaerobic Training Effect', 'value': 'anaerobicTrainingEffect'},
+
+                # Distance & Speed
+                {'label': 'Distance (km)', 'value': 'distance'},
+                {'label': 'Average Speed', 'value': 'averageSpeed'},
+                {'label': 'Max Speed', 'value': 'maxSpeed'},
+
+                # Time Based
+                {'label': 'Moving Duration', 'value': 'movingDuration'},
+                {'label': 'Moderate Intensity Minutes', 'value': 'moderateIntensityMinutes'},
+                {'label': 'Vigorous Intensity Minutes', 'value': 'vigorousIntensityMinutes'},
+
+                # Elevation
+                {'label': 'Elevation Gain', 'value': 'elevationGain'},
+                {'label': 'Elevation Loss', 'value': 'elevationLoss'},
+                {'label': 'Max Elevation', 'value': 'maxElevation'},
+
+                # Strength Training
+                {'label': 'Total Sets', 'value': 'totalSets'},
+                {'label': 'Total Reps', 'value': 'totalReps'},
+                {'label': 'Active Sets', 'value': 'activeSets'},
+                {'label': 'Water Loss (ml)', 'value': 'waterEstimated'},
+
+                # Temperature
+                {'label': 'Min Temperature', 'value': 'minTemperature'},
+                {'label': 'Max Temperature', 'value': 'maxTemperature'}
             ],
             value='calories'
         ),
@@ -86,28 +117,54 @@ def create_metric_controls(first_day_last_month, last_day_last_month):
     ])
 
 def create_activity_chart(df, selected_metric, start_date, end_date, goal_value):
+    # Handle unit conversions and data preprocessing
+    if selected_metric == 'duration':
+        df[selected_metric] = df[selected_metric] / 60  # Convert to minutes
+    elif selected_metric == 'distance':
+        df[selected_metric] = df[selected_metric] / 1000  # Convert to kilometers
+
     mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
     filtered_df = df.loc[mask]
+
+    # For metrics that might not exist in all activities
+    if selected_metric not in filtered_df.columns:
+        filtered_df[selected_metric] = 0
 
     goal_reached = filtered_df[filtered_df[selected_metric] >= goal_value]
     goal_not_reached = filtered_df[filtered_df[selected_metric] < goal_value]
 
+    # Create activity type markers
+    activity_types = filtered_df['activityType'].apply(lambda x: x['typeKey'] if isinstance(x, dict) else 'unknown')
+
     fig = go.Figure()
 
+    # Add bars for goal reached activities
     fig.add_trace(go.Bar(
         x=goal_reached['startTimeLocal'],
         y=goal_reached[selected_metric],
         marker_color='green',
-        name='Goal Reached'
+        name='Goal Reached',
+        text=activity_types[goal_reached.index],
+        hovertemplate="Date: %{x}<br>" +
+                      f"{selected_metric}: %{{y}}<br>" +
+                      "Activity: %{text}<br>" +
+                      "<extra></extra>"
     ))
 
+    # Add bars for activities not reaching goal
     fig.add_trace(go.Bar(
         x=goal_not_reached['startTimeLocal'],
         y=goal_not_reached[selected_metric],
         marker_color='red',
-        name='Goal Not Reached'
+        name='Goal Not Reached',
+        text=activity_types[goal_not_reached.index],
+        hovertemplate="Date: %{x}<br>" +
+                      f"{selected_metric}: %{{y}}<br>" +
+                      "Activity: %{text}<br>" +
+                      "<extra></extra>"
     ))
 
+    # Add goal line
     fig.add_trace(go.Scatter(
         x=[start_date, end_date],
         y=[goal_value, goal_value],
@@ -116,16 +173,49 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
         line=dict(color='blue', dash='dash')
     ))
 
+    # Customize layout
+    metric_label = selected_metric.replace('_', ' ').title()
+    units = get_metric_units(selected_metric)
+
     fig.update_layout(
-        title=f"{selected_metric.capitalize()} Over Time",
-        xaxis_title='startTimeLocal',
-        yaxis_title=selected_metric.capitalize(),
+        title=f"{metric_label} Over Time",
+        xaxis_title='Date',
+        yaxis_title=f"{metric_label} ({units})",
         xaxis=dict(
             tickformat="%b %d",
             ticklabelmode="period",
             dtick="D1"
         ),
-        barmode='group'
+        barmode='group',
+        hovermode='closest'
     )
 
     return fig
+
+def get_metric_units(metric):
+    """Return the appropriate units for each metric"""
+    units = {
+        'calories': 'kcal',
+        'steps': 'steps',
+        'duration': 'minutes',
+        'averageHR': 'bpm',
+        'maxHR': 'bpm',
+        'aerobicTrainingEffect': 'points',
+        'anaerobicTrainingEffect': 'points',
+        'distance': 'km',
+        'averageSpeed': 'km/h',
+        'maxSpeed': 'km/h',
+        'movingDuration': 'minutes',
+        'moderateIntensityMinutes': 'minutes',
+        'vigorousIntensityMinutes': 'minutes',
+        'elevationGain': 'm',
+        'elevationLoss': 'm',
+        'maxElevation': 'm',
+        'totalSets': 'sets',
+        'totalReps': 'reps',
+        'activeSets': 'sets',
+        'waterEstimated': 'ml',
+        'minTemperature': '°C',
+        'maxTemperature': '°C'
+    }
+    return units.get(metric, '')
