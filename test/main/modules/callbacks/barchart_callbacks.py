@@ -1,7 +1,7 @@
 # modules/callbacks/barchart_callbacks.py
 from dash import Input, Output, State, callback_context, html, dcc, ALL
 import pandas as pd
-from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units
+from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units, METRIC_LABEL_MAP
 import json
 import dash
 
@@ -101,6 +101,9 @@ def create_goals_display(goals):
     if not goals:
         return html.Div("No goals set")
 
+    # Sort the metrics by their label rather than their key
+    sorted_metrics = sorted(goals.keys(), key=lambda m: METRIC_LABEL_MAP.get(m, m))
+
     # Create table header
     header = html.Tr([
         html.Th("Metric", style={'width': '40%', 'textAlign': 'left'}),
@@ -108,14 +111,15 @@ def create_goals_display(goals):
         html.Th("Units", style={'width': '30%', 'textAlign': 'left'})
     ])
 
-    # Create table rows
     rows = []
-    for metric, value in sorted(goals.items()):
+    for metric in sorted_metrics:
+        value = goals[metric]
         units = get_metric_units(metric)
-        metric_name = metric.replace('_', ' ').title()
+        # Use the same label as in the dropdown
+        metric_label = METRIC_LABEL_MAP.get(metric, metric.replace('_', ' ').title())
 
         row = html.Tr([
-            html.Td(metric_name),
+            html.Td(metric_label),
             html.Td(
                 dcc.Input(
                     id={'type': 'goal-input', 'metric': metric},

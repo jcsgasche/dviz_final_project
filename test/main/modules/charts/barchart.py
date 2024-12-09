@@ -52,49 +52,44 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
         ])
     ])
 
+METRIC_OPTIONS = [
+    {'label': 'Active Sets', 'value': 'activeSets'},
+    {'label': 'Aerobic Training Effect', 'value': 'aerobicTrainingEffect'},
+    {'label': 'Anaerobic Training Effect', 'value': 'anaerobicTrainingEffect'},
+    {'label': 'Average Heart Rate', 'value': 'averageHR'},
+    {'label': 'Average Speed', 'value': 'averageSpeed'},
+    {'label': 'Calories', 'value': 'calories'},
+    {'label': 'Distance (km)', 'value': 'distance'},
+    {'label': 'Duration (minutes)', 'value': 'duration'},
+    {'label': 'Elevation Gain', 'value': 'elevationGain'},
+    {'label': 'Elevation Loss', 'value': 'elevationLoss'},
+    {'label': 'Max Elevation', 'value': 'maxElevation'},
+    {'label': 'Max Heart Rate', 'value': 'maxHR'},
+    {'label': 'Max Speed', 'value': 'maxSpeed'},
+    {'label': 'Max Temperature', 'value': 'maxTemperature'},
+    {'label': 'Min Temperature', 'value': 'minTemperature'},
+    {'label': 'Moderate Intensity Minutes', 'value': 'moderateIntensityMinutes'},
+    {'label': 'Moving Duration', 'value': 'movingDuration'},
+    {'label': 'Steps', 'value': 'steps'},
+    {'label': 'Total Reps', 'value': 'totalReps'},
+    {'label': 'Total Sets', 'value': 'totalSets'},
+    {'label': 'Vigorous Intensity Minutes', 'value': 'vigorousIntensityMinutes'},
+    {'label': 'Water Loss (ml)', 'value': 'waterEstimated'},
+]
+
+# Sort METRIC_OPTIONS by label
+METRIC_OPTIONS = sorted(METRIC_OPTIONS, key=lambda x: x['label'])
+
+# Create a dictionary for easy lookup of labels by metric value
+METRIC_LABEL_MAP = {opt['value']: opt['label'] for opt in METRIC_OPTIONS}
+
 def create_metric_controls(first_day_last_month, last_day_last_month):
     return html.Div([
         html.Div([
             html.Label("Select Metric:"),
             dcc.Dropdown(
                 id='metric-selector',
-                options=[
-                    # Basic Metrics
-                    {'label': 'Calories', 'value': 'calories'},
-                    {'label': 'Steps', 'value': 'steps'},
-                    {'label': 'Duration (minutes)', 'value': 'duration'},
-
-                    # Heart Rate Metrics
-                    {'label': 'Average Heart Rate', 'value': 'averageHR'},
-                    {'label': 'Maximum Heart Rate', 'value': 'maxHR'},
-                    {'label': 'Aerobic Training Effect', 'value': 'aerobicTrainingEffect'},
-                    {'label': 'Anaerobic Training Effect', 'value': 'anaerobicTrainingEffect'},
-
-                    # Distance & Speed
-                    {'label': 'Distance (km)', 'value': 'distance'},
-                    {'label': 'Average Speed', 'value': 'averageSpeed'},
-                    {'label': 'Max Speed', 'value': 'maxSpeed'},
-
-                    # Time Based
-                    {'label': 'Moving Duration', 'value': 'movingDuration'},
-                    {'label': 'Moderate Intensity Minutes', 'value': 'moderateIntensityMinutes'},
-                    {'label': 'Vigorous Intensity Minutes', 'value': 'vigorousIntensityMinutes'},
-
-                    # Elevation
-                    {'label': 'Elevation Gain', 'value': 'elevationGain'},
-                    {'label': 'Elevation Loss', 'value': 'elevationLoss'},
-                    {'label': 'Max Elevation', 'value': 'maxElevation'},
-
-                    # Strength Training
-                    {'label': 'Total Sets', 'value': 'totalSets'},
-                    {'label': 'Total Reps', 'value': 'totalReps'},
-                    {'label': 'Active Sets', 'value': 'activeSets'},
-                    {'label': 'Water Loss (ml)', 'value': 'waterEstimated'},
-
-                    # Temperature
-                    {'label': 'Min Temperature', 'value': 'minTemperature'},
-                    {'label': 'Max Temperature', 'value': 'maxTemperature'}
-                ],
+                options=METRIC_OPTIONS,  # Use the sorted list here
                 value='calories'
             )
         ], style={'width': '50%', 'marginBottom': '20px'}),
