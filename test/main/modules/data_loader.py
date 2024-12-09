@@ -41,12 +41,8 @@ def process_uploaded_file(contents, filename):
         if 'json' in filename.lower():
             data = json.load(io.BytesIO(decoded))
             df = pd.DataFrame(data)
-        elif 'csv' in filename.lower():
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-        elif 'xls' in filename.lower():
-            df = pd.read_excel(io.BytesIO(decoded))
         else:
-            return None, "Unsupported file format. Please upload a JSON, CSV, or Excel file."
+            return None, "Unsupported file format. Please upload a JSON file."
 
         required_columns = {"startTimeLocal", 'steps', 'calories', "distance", "averageHR"}
         missing_columns = required_columns - set(df.columns)
