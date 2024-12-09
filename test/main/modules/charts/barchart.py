@@ -34,33 +34,9 @@ def get_default_goals():
 
 def create_barchart_layout(first_day_last_month, last_day_last_month):
     return html.Div([
-        html.H1("Interactive Fitness Activity Dashboard"),
 
-        html.Div([
-            dcc.RadioItems(
-                id='data-source',
-                options=[
-                    {'label': 'Fetch from Garmin', 'value': 'garmin'},
-                    {'label': 'Upload Local Dataset', 'value': 'upload'}
-                ],
-                value='garmin',
-                labelStyle={'display': 'inline-block', 'margin-right': '20px'}
-            )
-        ], style={'margin-bottom': '20px'}),
+        html.H1("Goal/Reached Dashboard"),
 
-        html.Div([
-            html.Label("Garmin Email:"),
-            dcc.Input(id='garmin-email', type='email', placeholder='Enter your Garmin email', style={'width': '300px'}),
-            html.Br(),
-            html.Label("Garmin Password:"),
-            dcc.Input(id='garmin-password', type='password', placeholder='Enter your Garmin password', style={'width': '300px'}),
-            html.Br(),
-            html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'})
-        ], id='garmin-login', style={'display': 'block'}),
-
-        html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
-        html.Div(id='garmin-status', style={'margin-top': '10px', 'color': 'green'}),
-        html.Div(create_refresh_section(), id='refresh-section', style={'margin-bottom': '20px'}),
         create_metric_controls(first_day_last_month, last_day_last_month),
         dcc.Graph(id="activity-graph"),
 
@@ -75,29 +51,6 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
             html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
         ])
     ])
-
-def create_upload_section():
-    return [
-        dcc.Upload(
-            id='upload-data',
-            children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
-            style={
-                'width': '300px',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            },
-            multiple=False
-        ),
-        html.Div(id='upload-status', style={'margin-top': '10px', 'color': 'green'})
-    ]
-
-def create_refresh_section():
-    return html.Button('Refresh Data', id='refresh-button', n_clicks=0)
 
 def create_metric_controls(first_day_last_month, last_day_last_month):
     return html.Div([

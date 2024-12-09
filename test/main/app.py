@@ -1,7 +1,7 @@
 # app.py updates
 from dash import Dash, html
 from modules.charts.barchart import create_barchart_layout
-from modules.utils import calculate_date_range
+from modules.utils import calculate_date_range, create_general_layout
 from modules.callbacks.data_callbacks import register_data_callbacks
 from modules.callbacks.ui_callbacks import register_ui_callbacks
 from modules.callbacks.barchart_callbacks import register_barchart_callbacks
@@ -10,6 +10,7 @@ app = Dash(__name__)
 first_day_last_month, last_day_last_month = calculate_date_range()
 
 app.layout = html.Div([
+    create_general_layout(),
     (create_barchart_layout(first_day_last_month, last_day_last_month)),
 ])
 
