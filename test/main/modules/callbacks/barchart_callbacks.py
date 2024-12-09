@@ -1,4 +1,4 @@
-# modules/callbacks/chart_callbacks.py
+# modules/callbacks/barchart_callbacks.py
 from dash import Input, Output, State
 import pandas as pd
 from modules.charts.barchart import create_activity_chart
