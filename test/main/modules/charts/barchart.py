@@ -3,6 +3,34 @@ from dash import dcc, html, Input, Output, State
 import plotly.graph_objects as go
 import pandas as pd
 import dash
+import json
+
+def get_default_goals():
+    """Return default goals for each metric"""
+    return {
+        'calories': 500,
+        'steps': 10000,
+        'duration': 60,  # minutes
+        'averageHR': 140,
+        'maxHR': 180,
+        'aerobicTrainingEffect': 3,
+        'anaerobicTrainingEffect': 1,
+        'distance': 5,  # km
+        'averageSpeed': 10,  # km/h
+        'maxSpeed': 15,  # km/h
+        'movingDuration': 45,  # minutes
+        'moderateIntensityMinutes': 30,
+        'vigorousIntensityMinutes': 20,
+        'elevationGain': 100,  # meters
+        'elevationLoss': 100,  # meters
+        'maxElevation': 500,  # meters
+        'totalSets': 15,
+        'totalReps': 150,
+        'activeSets': 15,
+        'waterEstimated': 500,  # ml
+        'minTemperature': 15,  # °C
+        'maxTemperature': 25,  # °C
+    }
 
 def create_barchart_layout(first_day_last_month, last_day_last_month):
     return html.Div([
@@ -35,7 +63,17 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
         html.Div(create_refresh_section(), id='refresh-section', style={'margin-bottom': '20px'}),
         create_metric_controls(first_day_last_month, last_day_last_month),
         dcc.Graph(id="activity-graph"),
-        dcc.Store(id='stored-data')
+
+        # Store components for data persistence
+        dcc.Store(id='stored-data'),
+        dcc.Store(id='stored-goals', data=get_default_goals()),
+
+        # Goals management section
+        html.Div([
+            html.H3("Metric Goals", style={'marginTop': '20px'}),
+            html.Div(id='current-goals-display'),  # Will be populated with current goals
+            html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
+        ])
     ])
 
 def create_upload_section():
@@ -63,57 +101,75 @@ def create_refresh_section():
 
 def create_metric_controls(first_day_last_month, last_day_last_month):
     return html.Div([
-        html.Label("Select Metric:"),
-        dcc.Dropdown(
-            id='metric-selector',
-            options=[
-                # Basic Metrics
-                {'label': 'Calories', 'value': 'calories'},
-                {'label': 'Steps', 'value': 'steps'},
-                {'label': 'Duration (minutes)', 'value': 'duration'},
+        html.Div([
+            html.Label("Select Metric:"),
+            dcc.Dropdown(
+                id='metric-selector',
+                options=[
+                    # Basic Metrics
+                    {'label': 'Calories', 'value': 'calories'},
+                    {'label': 'Steps', 'value': 'steps'},
+                    {'label': 'Duration (minutes)', 'value': 'duration'},
 
-                # Heart Rate Metrics
-                {'label': 'Average Heart Rate', 'value': 'averageHR'},
-                {'label': 'Maximum Heart Rate', 'value': 'maxHR'},
-                {'label': 'Aerobic Training Effect', 'value': 'aerobicTrainingEffect'},
-                {'label': 'Anaerobic Training Effect', 'value': 'anaerobicTrainingEffect'},
+                    # Heart Rate Metrics
+                    {'label': 'Average Heart Rate', 'value': 'averageHR'},
+                    {'label': 'Maximum Heart Rate', 'value': 'maxHR'},
+                    {'label': 'Aerobic Training Effect', 'value': 'aerobicTrainingEffect'},
+                    {'label': 'Anaerobic Training Effect', 'value': 'anaerobicTrainingEffect'},
 
-                # Distance & Speed
-                {'label': 'Distance (km)', 'value': 'distance'},
-                {'label': 'Average Speed', 'value': 'averageSpeed'},
-                {'label': 'Max Speed', 'value': 'maxSpeed'},
+                    # Distance & Speed
+                    {'label': 'Distance (km)', 'value': 'distance'},
+                    {'label': 'Average Speed', 'value': 'averageSpeed'},
+                    {'label': 'Max Speed', 'value': 'maxSpeed'},
 
-                # Time Based
-                {'label': 'Moving Duration', 'value': 'movingDuration'},
-                {'label': 'Moderate Intensity Minutes', 'value': 'moderateIntensityMinutes'},
-                {'label': 'Vigorous Intensity Minutes', 'value': 'vigorousIntensityMinutes'},
+                    # Time Based
+                    {'label': 'Moving Duration', 'value': 'movingDuration'},
+                    {'label': 'Moderate Intensity Minutes', 'value': 'moderateIntensityMinutes'},
+                    {'label': 'Vigorous Intensity Minutes', 'value': 'vigorousIntensityMinutes'},
 
-                # Elevation
-                {'label': 'Elevation Gain', 'value': 'elevationGain'},
-                {'label': 'Elevation Loss', 'value': 'elevationLoss'},
-                {'label': 'Max Elevation', 'value': 'maxElevation'},
+                    # Elevation
+                    {'label': 'Elevation Gain', 'value': 'elevationGain'},
+                    {'label': 'Elevation Loss', 'value': 'elevationLoss'},
+                    {'label': 'Max Elevation', 'value': 'maxElevation'},
 
-                # Strength Training
-                {'label': 'Total Sets', 'value': 'totalSets'},
-                {'label': 'Total Reps', 'value': 'totalReps'},
-                {'label': 'Active Sets', 'value': 'activeSets'},
-                {'label': 'Water Loss (ml)', 'value': 'waterEstimated'},
+                    # Strength Training
+                    {'label': 'Total Sets', 'value': 'totalSets'},
+                    {'label': 'Total Reps', 'value': 'totalReps'},
+                    {'label': 'Active Sets', 'value': 'activeSets'},
+                    {'label': 'Water Loss (ml)', 'value': 'waterEstimated'},
 
-                # Temperature
-                {'label': 'Min Temperature', 'value': 'minTemperature'},
-                {'label': 'Max Temperature', 'value': 'maxTemperature'}
-            ],
-            value='calories'
-        ),
-        html.Label("Select Time Frame:"),
-        dcc.DatePickerRange(
-            id='date-range',
-            start_date=first_day_last_month.date(),
-            end_date=last_day_last_month.date()
-        ),
-        html.Label("Set Goal Value:"),
-        dcc.Input(id="goal-input", type="number", value=500, placeholder="Enter goal value"),
-        html.Button("Set Goal", id="set-goal-button", n_clicks=0)
+                    # Temperature
+                    {'label': 'Min Temperature', 'value': 'minTemperature'},
+                    {'label': 'Max Temperature', 'value': 'maxTemperature'}
+                ],
+                value='calories'
+            )
+        ], style={'width': '50%', 'marginBottom': '20px'}),
+
+        html.Div([
+            html.Label("Select Time Frame:"),
+            dcc.DatePickerRange(
+                id='date-range',
+                start_date=first_day_last_month.date(),
+                end_date=last_day_last_month.date()
+            )
+        ], style={'marginBottom': '20px'}),
+
+        html.Div([
+            html.Label("Set Goal for Selected Metric:"),
+            dcc.Input(
+                id="goal-input",
+                type="number",
+                placeholder="Enter goal value",
+                style={'marginRight': '10px'}
+            ),
+            html.Button(
+                "Save Goal",
+                id="save-goal-button",
+                n_clicks=0,
+                style={'marginLeft': '10px'}
+            )
+        ])
     ])
 
 def create_activity_chart(df, selected_metric, start_date, end_date, goal_value):
