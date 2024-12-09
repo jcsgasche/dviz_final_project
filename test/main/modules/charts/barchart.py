@@ -109,18 +109,18 @@ def create_metric_controls(first_day_last_month, last_day_last_month):
         ], style={'marginBottom': '20px'}),
 
         html.Div([
-            html.Label("Set Goal for Selected Metric:"),
+            html.Label("Quick Goal Setting:"),
             dcc.Input(
-                id="goal-input",
+                id={'type': 'goal-input', 'metric': 'quick-set'},
                 type="number",
                 placeholder="Enter goal value",
-                style={'marginRight': '10px'}
-            ),
-            html.Button(
-                "Save Goal",
-                id="save-goal-button",
-                n_clicks=0,
-                style={'marginLeft': '10px'}
+                style={
+                    'width': '100px',
+                    'padding': '5px',
+                    'border': '1px solid #ddd',
+                    'borderRadius': '4px',
+                    'marginLeft': '10px'
+                }
             )
         ])
     ])
