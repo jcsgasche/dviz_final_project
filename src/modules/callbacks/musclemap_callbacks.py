@@ -3,7 +3,7 @@ from dash import Input, Output
 import json
 import datetime
 import os
-from modules.musclemap import musclemap_load, musclemap_plot
+from modules.charts.musclemap import musclemap_load, musclemap_plot
 
 def register_musclemap_callbacks(app):
     @app.callback(
@@ -44,7 +44,7 @@ def register_musclemap_callbacks(app):
 
         # Load muscle coordinates
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        coordinates_path = os.path.join(script_dir, '..', 'musclemap', 'data', 'muscle_coordinates.json')
+        coordinates_path = os.path.join(script_dir, '..', 'charts', 'musclemap', 'data', 'muscle_coordinates.json')
         muscle_coordinates = musclemap_plot.load_and_parse_muscle_coordinates(coordinates_path)
 
         # Generate the muscle map image

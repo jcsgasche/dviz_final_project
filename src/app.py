@@ -4,7 +4,7 @@ from pathlib import Path
 
 from modules.charts.barchart import create_barchart_layout
 from modules.charts.activity_breakdown import create_activity_breakdown_layout
-from modules.charts.musclemap import create_musclemap_layout
+from modules.charts.musclemap.musclemap import create_musclemap_layout
 from modules.utils import calculate_date_range, create_data_layout
 from modules.callbacks.data_callbacks import register_data_callbacks
 from modules.callbacks.ui_callbacks import register_ui_callbacks
