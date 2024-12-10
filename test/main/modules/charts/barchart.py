@@ -18,7 +18,7 @@ def get_default_goals():
         'distance': 5,  # km
         'averageSpeed': 10,  # km/h
         'maxSpeed': 15,  # km/h
-        'movingDuration': 45,  # minutes
+        'movingDuration': 900,  # minutes
         'moderateIntensityMinutes': 30,
         'vigorousIntensityMinutes': 20,
         'elevationGain': 100,  # meters
@@ -32,25 +32,179 @@ def get_default_goals():
         'maxTemperature': 25,  # °C
     }
 
+
 def create_barchart_layout(first_day_last_month, last_day_last_month):
     return html.Div([
-
         html.H1("Goal/Reached Dashboard"),
 
-        create_metric_controls(first_day_last_month, last_day_last_month),
-        dcc.Graph(id="activity-graph"),
+        # Container for controls
+        html.Div([
+            # Date range picker
+            html.Div([
+                html.Label("Select Time Frame:"),
+                dcc.DatePickerRange(
+                    id='date-range',
+                    start_date=first_day_last_month.date(),
+                    end_date=last_day_last_month.date()
+                )
+            ], style={'marginBottom': '20px'}),
+
+            # Metric selector container
+            html.Div([
+                html.Label("Select Metric:"),
+                dcc.Dropdown(
+                    id='metric-selector',
+                    options=METRIC_OPTIONS,
+                    value='calories'
+                )
+            ], id='metric-selector-container', style={'width': '50%', 'marginBottom': '20px'}),
+
+            # Quick goal setting
+            html.Div([
+                html.Label("Quick Goal Setting:"),
+                dcc.Input(
+                    id={'type': 'goal-input', 'metric': 'quick-set'},
+                    type="number",
+                    placeholder="Enter goal value",
+                    style={
+                        'width': '100px',
+                        'padding': '5px',
+                        'border': '1px solid #ddd',
+                        'borderRadius': '4px',
+                        'marginLeft': '10px'
+                    }
+                )
+            ], id='quick-goal-container'),
+
+            # Toggle button
+            html.Button(
+                "Toggle Summary View",
+                id='toggle-summary-view',
+                n_clicks=0,
+                style={'marginBottom': '20px', 'marginLeft': '20px'}
+            ),
+        ]),
+
+        # Container for both graphs
+        html.Div([
+            dcc.Graph(id="activity-graph", style={'display': 'block'}),
+            dcc.Graph(id="summary-graph", style={'display': 'none'}),
+        ]),
 
         # Store components for data persistence
         dcc.Store(id='stored-data'),
         dcc.Store(id='stored-goals', data=get_default_goals()),
+        dcc.Store(id='view-type', data='detail'),
 
         # Goals management section
         html.Div([
             html.H3("Metric Goals", style={'marginTop': '20px'}),
-            html.Div(id='current-goals-display'),  # Will be populated with current goals
+            html.Div(id='current-goals-display'),
             html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
         ])
     ])
+
+def create_summary_chart(df, start_date, end_date, stored_goals):
+    """Create a summary chart showing all metrics' performance as percentage of their goals"""
+    summary_data = {}
+
+    # Calculate mean for each metric in the period and convert to percentage of goal
+    for metric in METRIC_OPTIONS:
+        metric_key = metric['value']
+        if metric_key in df.columns:
+            # Apply any necessary conversions
+            values = df[metric_key]
+            if metric_key == 'duration':
+                values = values / 60  # Convert to minutes
+            elif metric_key == 'distance':
+                values = values / 1000  # Convert to kilometers
+
+            mean_value = values.mean()
+            goal_value = stored_goals.get(metric_key, get_default_goals()[metric_key])
+
+            # Calculate percentage of goal reached
+            percentage = (mean_value / goal_value * 100) if goal_value != 0 else 0
+
+            summary_data[metric_key] = {
+                'percentage': percentage,
+                'mean': mean_value,  # Keep raw value for hover info
+                'goal': goal_value,  # Keep goal for hover info
+                'reached': percentage >= 100
+            }
+
+    # Create the summary bar chart
+    fig = go.Figure()
+
+    # Prepare data for plotting
+    metrics = []
+    percentages = []
+    colors = []
+    hover_texts = []
+
+    # Sort metrics by their labels
+    sorted_metrics = sorted(summary_data.keys(), key=lambda x: METRIC_LABEL_MAP.get(x, x))
+
+    for metric in sorted_metrics:
+        data = summary_data[metric]
+        metric_label = METRIC_LABEL_MAP.get(metric, metric.replace('_', ' ').title())
+        metrics.append(metric_label)
+        percentages.append(data['percentage'])
+        colors.append('green' if data['reached'] else 'red')
+
+        # Create detailed hover text
+        units = get_metric_units(metric)
+        hover_texts.append(
+            f"Metric: {metric_label}<br>" +
+            f"Goal: {data['goal']:.1f} {units}<br>" +
+            f"Average: {data['mean']:.1f} {units}<br>" +
+            f"Percentage: {data['percentage']:.1f}%"
+        )
+
+    # Add bars for percentage values
+    fig.add_trace(go.Bar(
+        x=metrics,
+        y=percentages,
+        marker_color=colors,
+        name='% of Goal',
+        text=[f"{p:.1f}%" for p in percentages],
+        textposition='auto',
+        hovertext=hover_texts,
+        hoverinfo='text'
+    ))
+
+    # Add 100% goal line
+    fig.add_trace(go.Scatter(
+        x=metrics,
+        y=[100] * len(metrics),
+        mode='lines',
+        name='Goal (100%)',
+        line=dict(
+            color='blue',
+            dash='dash'
+        )
+    ))
+
+    # Customize layout
+    fig.update_layout(
+        title='Summary of All Metrics (Percentage of Goals Reached)',
+        xaxis_title='Metrics',
+        yaxis_title='Percentage of Goal (%)',
+        xaxis=dict(
+            tickangle=45,
+            tickmode='array',
+            ticktext=metrics,
+            tickvals=list(range(len(metrics)))
+        ),
+        yaxis=dict(
+            range=[0, max(max(percentages) * 1.1, 120)],  # Make sure 100% line is visible
+        ),
+        showlegend=True,
+        height=600,
+        margin=dict(b=150),  # Add bottom margin for rotated labels
+        hovermode='closest'
+    )
+
+    return fig
 
 METRIC_OPTIONS = [
     {'label': 'Active Sets', 'value': 'activeSets'},
@@ -86,15 +240,6 @@ METRIC_LABEL_MAP = {opt['value']: opt['label'] for opt in METRIC_OPTIONS}
 def create_metric_controls(first_day_last_month, last_day_last_month):
     return html.Div([
         html.Div([
-            html.Label("Select Metric:"),
-            dcc.Dropdown(
-                id='metric-selector',
-                options=METRIC_OPTIONS,  # Use the sorted list here
-                value='calories'
-            )
-        ], style={'width': '50%', 'marginBottom': '20px'}),
-
-        html.Div([
             html.Label("Select Time Frame:"),
             dcc.DatePickerRange(
                 id='date-range',
@@ -102,6 +247,15 @@ def create_metric_controls(first_day_last_month, last_day_last_month):
                 end_date=last_day_last_month.date()
             )
         ], style={'marginBottom': '20px'}),
+
+        html.Div([
+            html.Label("Select Metric:"),
+            dcc.Dropdown(
+                id='metric-selector',
+                options=METRIC_OPTIONS,  # Use the sorted list here
+                value='calories'
+            )
+        ], style={'width': '50%', 'marginBottom': '20px'}),
 
         html.Div([
             html.Label("Quick Goal Setting:"),
