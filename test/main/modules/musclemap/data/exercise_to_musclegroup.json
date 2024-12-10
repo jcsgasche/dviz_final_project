@@ -100,5 +100,13 @@
             "BackTrapsRight",
             "BackTrapsLeft"
         ]
+    },
+    "TRICEPS_EXTENSION": {
+        "primary": [
+            "Undefined"
+        ],
+        "secondary": [
+            "Undefined"
+        ]
     }
 }

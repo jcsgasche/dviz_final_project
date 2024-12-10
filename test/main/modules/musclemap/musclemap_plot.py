@@ -9,20 +9,28 @@ import io
 import base64
 
 def parse_svg_path(d):
-    path_data = re.findall(r"[-+]?[0-9]*\\.?[0-9]+", d)
+    """
+    Parse raw SVG paths into coordinate lists.
+    """
+    # Use the given regex and logic directly
+    path_data = re.findall(r"[-+]?[0-9]*\.?[0-9]+", d)
     coords = []
     for i in range(0, len(path_data), 2):
         x = float(path_data[i])
         y = float(path_data[i + 1])
-        coords.append((x, -y))  # Negate y
+        coords.append((x, -y))  # Negate y to match typical plot coordinates
     return coords
 
 def apply_transformation(coords, transform):
-    translated_coords = [
+    """
+    Apply translation transformation to a list of coordinates.
+    """
+    if not coords:
+        return coords
+    return [
         (x + transform.get("translateX", 0), y + transform.get("translateY", 0))
         for x, y in coords
     ]
-    return translated_coords
 
 def load_and_parse_muscle_coordinates(filename):
     file_path = os.path.abspath(filename)
@@ -41,14 +49,19 @@ def load_and_parse_muscle_coordinates(filename):
             for muscle, paths in muscles.items():
                 parsed_data[view][muscle] = []
                 for path_data in paths:
+                    if "path" not in path_data or not path_data["path"]:
+                        # If there's no path or it's empty, skip
+                        continue
                     parsed_coords = parse_svg_path(path_data["path"])
                     transformed_coords = apply_transformation(
                         parsed_coords, path_data.get("transform", {})
                     )
-                    parsed_data[view][muscle].append({
-                        "coords": transformed_coords,
-                        "style": path_data["style"]
-                    })
+                    # Only append if we have at least 3 points for a polygon
+                    if len(transformed_coords) >= 3:
+                        parsed_data[view][muscle].append({
+                            "coords": transformed_coords,
+                            "style": path_data["style"]
+                        })
     return parsed_data.get("Front", {})
 
 def plot_muscle_map(processed_strength_activities, muscle_coordinates, title, zoom_out_factor=1.5):
@@ -71,8 +84,8 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, title, zo
 
     fig, ax = plt.subplots(figsize=(19.8, 10.8))
 
-    xlim = (-110 * zoom_out_factor, 400 * zoom_out_factor)
-    ylim = (-25 * zoom_out_factor, 275 * zoom_out_factor)
+    xlim = (-110 * zoom_out_factor, 700 * zoom_out_factor)
+    ylim = (-25 * zoom_out_factor, 575 * zoom_out_factor)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
@@ -82,8 +95,11 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, title, zo
     for muscle_group, polygons in muscle_coordinates.items():
         for polygon_data in polygons:
             coords = polygon_data["coords"]
-            color = "lightgrey"
+            if not coords or len(coords) < 3:
+                # Not enough data to form a polygon
+                continue
 
+            color = "lightgrey"
             if muscle_group in primary_reps:
                 intensity = primary_reps[muscle_group] / max_primary_reps
                 color = (1, 0, 0, intensity)  # Red
