@@ -78,7 +78,6 @@ register_data_callbacks(app)
 register_ui_callbacks(app)
 register_barchart_callbacks(app)
 register_activity_breakdown_callbacks(app)
-register_muscledata_callbacks(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
