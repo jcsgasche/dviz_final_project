@@ -1,11 +1,21 @@
 # modules/callbacks/barchart_callbacks.py
 from dash import Input, Output, State, callback_context, html, dcc, ALL
 import pandas as pd
-from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units, create_summary_chart, METRIC_LABEL_MAP
+from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units, create_summary_chart, METRIC_LABEL_MAP, create_empty_chart
 import json
 import dash
 
 def register_barchart_callbacks(app):
+    @app.callback(
+        [Output('initial-loading-div', 'style'),
+         Output('data-loaded-div', 'style')],
+        [Input('stored-data', 'data')]
+    )
+    def switch_layout_visibility(stored_data):
+        if not stored_data:
+            return {'display': 'block'}, {'display': 'none'}
+        return {'display': 'none'}, {'display': 'block'}
+
     @app.callback(
         Output('activity-graph', 'figure'),
         [Input('metric-selector', 'value'),
@@ -13,11 +23,12 @@ def register_barchart_callbacks(app):
          Input('date-range', 'end_date'),
          Input('stored-data', 'data'),
          Input('stored-goals', 'data'),
-         Input('activity-graph', 'relayoutData')]
+         Input('activity-graph', 'relayoutData')],
+        prevent_initial_call=True
     )
     def update_chart(selected_metric, start_date, end_date, stored_data, stored_goals, relayout_data):
         if not stored_data or not stored_goals:
-            return {}
+            return {}  # Empty figure since this div won't be visible anyway
 
         df = pd.DataFrame(stored_data)
         df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
@@ -28,7 +39,38 @@ def register_barchart_callbacks(app):
             start_date = relayout_data['xaxis.range[0]'][:10]
             end_date = relayout_data['xaxis.range[1]'][:10]
 
-        return create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
+        # Check if there's any data in the filtered period
+        mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
+        filtered_df = df.loc[mask]
+
+        if len(filtered_df) == 0:
+            return create_empty_chart("No data available<br>in this period of time")
+
+        return create_activity_chart(filtered_df, selected_metric, start_date, end_date, goal_value)
+
+    @app.callback(
+        Output('summary-graph', 'figure'),
+        [Input('date-range', 'start_date'),
+         Input('date-range', 'end_date'),
+         Input('stored-data', 'data'),
+         Input('stored-goals', 'data'),
+         Input('view-type', 'data')],
+        prevent_initial_call=True
+    )
+    def update_summary_chart(start_date, end_date, stored_data, stored_goals, view_type):
+        if not stored_data or not stored_goals or view_type == 'detail':
+            return create_empty_chart("Waiting for you to add<br>your personal fitness data")
+
+        df = pd.DataFrame(stored_data)
+        df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
+
+        mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
+        filtered_df = df.loc[mask]
+
+        if len(filtered_df) == 0:
+            return create_empty_chart("No data available<br>in this period of time")
+
+        return create_summary_chart(filtered_df, start_date, end_date, stored_goals)
 
     @app.callback(
         [Output('stored-goals', 'data'),
@@ -125,27 +167,6 @@ def register_barchart_callbacks(app):
                     'detail',
                     {'width': '50%', 'marginBottom': '20px', 'display': 'block'},
                     {'display': 'block'})
-
-    @app.callback(
-        Output('summary-graph', 'figure'),
-        [Input('date-range', 'start_date'),
-         Input('date-range', 'end_date'),
-         Input('stored-data', 'data'),
-         Input('stored-goals', 'data'),
-         Input('view-type', 'data')]
-    )
-    def update_summary_chart(start_date, end_date, stored_data, stored_goals, view_type):
-        if not stored_data or not stored_goals or view_type == 'detail':
-            return {}
-
-        df = pd.DataFrame(stored_data)
-        df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
-
-        # Filter data for selected date range
-        mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
-        filtered_df = df.loc[mask]
-
-        return create_summary_chart(filtered_df, start_date, end_date, stored_goals)
 
 def create_goals_display(goals):
     """Create a formatted display of all current goals with editable inputs"""

@@ -32,69 +32,6 @@ def get_default_goals():
         'maxTemperature': 25,  # °C
     }
 
-
-def create_barchart_layout(first_day_last_month, last_day_last_month):
-    return html.Div([
-        html.H1("Goal/Reached Dashboard"),
-
-        # Container for controls
-        html.Div([
-            # Toggle button
-            html.Button(
-                "Toggle Summary View",
-                id='toggle-summary-view',
-                n_clicks=0,
-                style={'marginBottom': '10px'}
-            ),
-
-            # Metric selector container
-            html.Div([
-                html.Label("Select Metric:"),
-                dcc.Dropdown(
-                    id='metric-selector',
-                    options=METRIC_OPTIONS,
-                    value='calories'
-                )
-            ], id='metric-selector-container', style={'width': '50%', 'marginBottom': '20px'}),
-
-            # Quick goal setting
-            html.Div([
-                html.Label("Quick Goal Setting:"),
-                dcc.Input(
-                    id={'type': 'goal-input', 'metric': 'quick-set'},
-                    type="number",
-                    placeholder="Enter goal value",
-                    style={
-                        'width': '100px',
-                        'padding': '5px',
-                        'border': '1px solid #ddd',
-                        'borderRadius': '4px',
-                        'marginLeft': '10px'
-                    }
-                )
-            ], id='quick-goal-container'),
-        ]),
-
-        # Container for both graphs
-        html.Div([
-            dcc.Graph(id="activity-graph", style={'display': 'block'}),
-            dcc.Graph(id="summary-graph", style={'display': 'none'}),
-        ]),
-
-        # Store components for data persistence
-        dcc.Store(id='stored-data'),
-        dcc.Store(id='stored-goals', data=get_default_goals()),
-        dcc.Store(id='view-type', data='detail'),
-
-        # Goals management section
-        html.Div([
-            html.H3("Metric Goals", style={'marginTop': '20px'}),
-            html.Div(id='current-goals-display'),
-            html.Br(),
-            html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
-        ])
-    ])
-
 def create_summary_chart(df, start_date, end_date, stored_goals):
     """Create a summary chart showing all metrics' performance as percentage of their goals"""
     summary_data = {}
@@ -256,7 +193,151 @@ def create_metric_controls(first_day_last_month, last_day_last_month):
         ])
     ])
 
+def create_empty_chart(message):
+    """Create an empty chart with a perfectly centered message and no default rendering"""
+    fig = go.Figure()
+
+    # Add centered message with xanchor and yanchor for perfect centering
+    fig.add_annotation(
+        text=message,
+        x=0.5,
+        y=0.5,
+        xref="paper",
+        yref="paper",
+        showarrow=False,
+        font=dict(size=14),
+        xanchor='center',
+        yanchor='middle',
+        align='center'
+    )
+
+    # Update layout with specific settings to prevent default rendering
+    fig.update_layout(
+        showlegend=False,
+        height=600,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=80, l=20, r=20, b=20),
+        font=dict(family="Arial, sans-serif"),
+        xaxis=dict(
+            visible=False,
+            showticklabels=False,
+            showgrid=False,
+            range=[-1, 1]
+        ),
+        yaxis=dict(
+            visible=False,
+            showticklabels=False,
+            showgrid=False,
+            range=[-1, 1]
+        ),
+        annotations=[{
+            'text': message,
+            'x': 0.5,
+            'y': 0.5,
+            'xref': 'paper',
+            'yref': 'paper',
+            'showarrow': False,
+            'font': {'size': 14},
+            'xanchor': 'center',
+            'yanchor': 'middle',
+            'align': 'center'
+        }]
+    )
+
+    return fig
+
+def create_initial_loading_div():
+    """Create the initial empty state div"""
+    initial_empty_figure = create_empty_chart("Waiting for you to add<br>your personal fitness data")
+    return html.Div([
+        html.H1("Goal/Reached Dashboard"),
+        dcc.Graph(
+            figure=initial_empty_figure,
+            config={
+                'displayModeBar': False,
+                'staticPlot': True,
+            }
+        )
+    ], id='initial-loading-div')
+
+def create_data_loaded_div(first_day_last_month, last_day_last_month):
+    """Create the complete div for when data is loaded"""
+    return html.Div([
+        html.H1("Goal/Reached Dashboard"),
+
+        # Container for controls
+        html.Div([
+            # Toggle button
+            html.Button(
+                "Toggle Summary View",
+                id='toggle-summary-view',
+                n_clicks=0,
+                style={'marginBottom': '10px'}
+            ),
+
+            # Metric selector container
+            html.Div([
+                html.Label("Select Metric:"),
+                dcc.Dropdown(
+                    id='metric-selector',
+                    options=METRIC_OPTIONS,
+                    value='calories'
+                )
+            ], id='metric-selector-container', style={'width': '50%', 'marginBottom': '20px'}),
+
+            # Quick goal setting
+            html.Div([
+                html.Label("Quick Goal Setting:"),
+                dcc.Input(
+                    id={'type': 'goal-input', 'metric': 'quick-set'},
+                    type="number",
+                    placeholder="Enter goal value",
+                    style={
+                        'width': '100px',
+                        'padding': '5px',
+                        'border': '1px solid #ddd',
+                        'borderRadius': '4px',
+                        'marginLeft': '10px'
+                    }
+                )
+            ], id='quick-goal-container'),
+        ]),
+
+        # Container for both graphs
+        html.Div([
+            dcc.Graph(id="activity-graph", style={'display': 'block'}),
+            dcc.Graph(id="summary-graph", style={'display': 'none'}),
+        ]),
+
+        # Goals management section
+        html.Div([
+            html.H3("Metric Goals", style={'marginTop': '20px'}),
+            html.Div(id='current-goals-display'),
+            html.Br(),
+            html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
+        ])
+    ], id='data-loaded-div', style={'display': 'none'})
+
+def create_barchart_layout(first_day_last_month, last_day_last_month):
+    return html.Div([
+        # The initial loading div
+        create_initial_loading_div(),
+
+        # The data loaded div (hidden initially)
+        create_data_loaded_div(first_day_last_month, last_day_last_month),
+
+        # Store components for data persistence
+        dcc.Store(id='stored-data'),
+        dcc.Store(id='stored-goals', data=get_default_goals()),
+        dcc.Store(id='view-type', data='detail')
+    ])
+
 def create_activity_chart(df, selected_metric, start_date, end_date, goal_value):
+    # If df is None (initial state, no data loaded)
+    if df is None:
+        return create_empty_chart("Waiting for you to add<br>your personal fitness data")
+
     # Handle unit conversions and data preprocessing
     if selected_metric == 'duration':
         df[selected_metric] = df[selected_metric] / 60  # Convert to minutes
@@ -265,6 +346,10 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
 
     mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
     filtered_df = df.loc[mask]
+
+    # Check if there's any data in the filtered period
+    if len(filtered_df) == 0:
+        return create_empty_chart("No data available<br>in this period of time")
 
     # For metrics that might not exist in all activities
     if selected_metric not in filtered_df.columns:
@@ -314,7 +399,7 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
     ))
 
     # Customize layout
-    metric_label = selected_metric.replace('_', ' ').title()
+    metric_label = METRIC_LABEL_MAP.get(selected_metric, selected_metric.replace('_', ' ').title())
     units = get_metric_units(selected_metric)
 
     fig.update_layout(
@@ -331,6 +416,7 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
     )
 
     return fig
+
 
 def get_metric_units(metric):
     """Return the appropriate units for each metric"""
