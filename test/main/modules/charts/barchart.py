@@ -81,7 +81,7 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
                 "Toggle Summary View",
                 id='toggle-summary-view',
                 n_clicks=0,
-                style={'marginBottom': '20px', 'marginLeft': '20px'}
+                style={'marginTop': '20px'}
             ),
         ]),
 
@@ -100,6 +100,7 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
         html.Div([
             html.H3("Metric Goals", style={'marginTop': '20px'}),
             html.Div(id='current-goals-display'),
+            html.Br(),
             html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
         ])
     ])
