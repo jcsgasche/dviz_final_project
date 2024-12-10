@@ -129,6 +129,8 @@ exercise_to_musclegroup = {
 }
 
 def get_muscle_groups_for_exercise(exercise_name):
+    global known_exercises, exercise_to_musclegroup
+    
     print(f"\nNew exercise detected: {exercise_name}")
     print("Please select primary muscle groups for this exercise.")
     print("Enter the numbers corresponding to the muscle groups, separated by commas.")
@@ -177,6 +179,7 @@ def get_muscle_groups_for_exercise(exercise_name):
     return exercise_to_musclegroup[exercise_name]
 
 def main():
+    global known_exercises, muscle_groups, exercise_to_musclegroup
     # Prompt the user for Garmin Connect credentials
     username = input("Enter your Garmin username: ")
     password = getpass.getpass("Enter your Garmin password: ")

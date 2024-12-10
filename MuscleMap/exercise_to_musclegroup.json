@@ -1,0 +1,104 @@
+{
+    "BENCH_PRESS": {
+        "primary": [
+            "FrontChestRight",
+            "FrontChestLeft"
+        ],
+        "secondary": [
+            "FrontDeltsRight",
+            "FrontDeltsLeft",
+            "BackTricepsRight",
+            "BackTricepsLeft"
+        ]
+    },
+    "FLYE": {
+        "primary": [
+            "FrontChestRight",
+            "FrontChestLeft"
+        ],
+        "secondary": [
+            "FrontBicepsRight",
+            "FrontBicepsLeft"
+        ]
+    },
+    "SIT_UP": {
+        "primary": [
+            "FrontAbsRight",
+            "FrontAbsLeft"
+        ],
+        "secondary": [
+            "FrontObliquesRight",
+            "FrontObliquesLeft"
+        ]
+    },
+    "LATERAL_RAISE": {
+        "primary": [
+            "FrontDeltsRight",
+            "FrontDeltsLeft"
+        ],
+        "secondary": [
+            "BackDeltsRight",
+            "BackDeltsLeft"
+        ]
+    },
+    "ROW": {
+        "primary": [
+            "BackLatsRight",
+            "BackLatsLeft"
+        ],
+        "secondary": [
+            "BackBicepsRight",
+            "BackBicepsLeft"
+        ]
+    },
+    "SQUAT": {
+        "primary": [
+            "FrontQuadsRight",
+            "FrontQuadsLeft"
+        ],
+        "secondary": [
+            "BackGlutesRight",
+            "BackGlutesLeft",
+            "BackHamstringsRight",
+            "BackHamstringsLeft"
+        ]
+    },
+    "CURL": {
+        "primary": [
+            "FrontBicepsRight",
+            "FrontBicepsLeft"
+        ],
+        "secondary": [
+            "FrontForearmsRight",
+            "FrontForearmsLeft"
+        ]
+    },
+    "PUSH_UP": {
+        "primary": [
+            "FrontChestRight",
+            "FrontChestLeft"
+        ],
+        "secondary": [
+            "BackTricepsRight",
+            "BackTricepsLeft"
+        ]
+    },
+    "UNKNOWN": {
+        "primary": [
+            "Undefined"
+        ],
+        "secondary": [
+            "Undefined"
+        ]
+    },
+    "PULL_UP": {
+        "primary": [
+            "BackLatsRight",
+            "BackLatsLeft"
+        ],
+        "secondary": [
+            "BackTrapsRight",
+            "BackTrapsLeft"
+        ]
+    }
+}
