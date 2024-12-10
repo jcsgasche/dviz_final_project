@@ -1,4 +1,4 @@
-# musclemap_plot.py
+# modules/musclemap/musclemap_plot.py
 import os
 import sys
 import json
@@ -9,22 +9,15 @@ import io
 import base64
 
 def parse_svg_path(d):
-    """
-    Parse raw SVG paths into coordinate lists.
-    """
     path_data = re.findall(r"[-+]?[0-9]*\\.?[0-9]+", d)
     coords = []
     for i in range(0, len(path_data), 2):
         x = float(path_data[i])
         y = float(path_data[i + 1])
-        # Negate y to match typical plot coordinates
-        coords.append((x, -y))
+        coords.append((x, -y))  # Negate y
     return coords
 
 def apply_transformation(coords, transform):
-    """
-    Apply translation transformation to a list of coordinates.
-    """
     translated_coords = [
         (x + transform.get("translateX", 0), y + transform.get("translateY", 0))
         for x, y in coords
@@ -32,12 +25,7 @@ def apply_transformation(coords, transform):
     return translated_coords
 
 def load_and_parse_muscle_coordinates(filename):
-    """
-    Load muscle coordinates from a JSON file and apply transformations.
-    Only returns the "Front" view for plotting.
-    """
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, filename)
+    file_path = os.path.abspath(filename)
 
     if not os.path.exists(file_path):
         print(f"Error: '{file_path}' not found.")
@@ -48,7 +36,7 @@ def load_and_parse_muscle_coordinates(filename):
 
     parsed_data = {}
     for view, muscles in raw_data.items():
-        if view == "Front":  # Only process the Front view
+        if view == "Front":
             parsed_data[view] = {}
             for muscle, paths in muscles.items():
                 parsed_data[view][muscle] = []
@@ -64,11 +52,7 @@ def load_and_parse_muscle_coordinates(filename):
     return parsed_data.get("Front", {})
 
 def plot_muscle_map(processed_strength_activities, muscle_coordinates, title, zoom_out_factor=1.5):
-    """
-    Plot the human body muscle map with intensity based on repetitions.
-    Returns a base64-encoded PNG image of the plot.
-    """
-    # Calculate total repetitions for primary and secondary muscles
+    # Calculate repetitions
     primary_reps = {}
     secondary_reps = {}
 
@@ -82,45 +66,39 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, title, zo
                 if muscle != 'Undefined':
                     secondary_reps[muscle] = secondary_reps.get(muscle, 0) + reps
 
-    # Find the maximum repetitions to normalize intensity
     max_primary_reps = max(primary_reps.values(), default=1)
     max_secondary_reps = max(secondary_reps.values(), default=1)
 
-    fig, ax = plt.subplots(figsize=(19.8, 10.8))  # Set the window frame size
+    fig, ax = plt.subplots(figsize=(19.8, 10.8))
 
-    # Adjust the limits to include the full figure range
     xlim = (-110 * zoom_out_factor, 400 * zoom_out_factor)
     ylim = (-25 * zoom_out_factor, 275 * zoom_out_factor)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
     ax.set_aspect('equal')
-    ax.axis('off')  # Turn off axis
+    ax.axis('off')
 
     for muscle_group, polygons in muscle_coordinates.items():
         for polygon_data in polygons:
             coords = polygon_data["coords"]
-            # style = polygon_data["style"]  # Currently unused, but available if needed
             color = "lightgrey"
 
             if muscle_group in primary_reps:
                 intensity = primary_reps[muscle_group] / max_primary_reps
-                color = (1, 0, 0, intensity)  # Red with alpha based on intensity
+                color = (1, 0, 0, intensity)  # Red
             elif muscle_group in secondary_reps:
                 intensity = secondary_reps[muscle_group] / max_secondary_reps
-                color = (1, 1, 0, intensity)  # Yellow with alpha based on intensity
+                color = (1, 1, 0, intensity)  # Yellow
 
             polygon = Polygon(coords, closed=True, facecolor=color, edgecolor="black", linewidth=0.5)
             ax.add_patch(polygon)
 
-    # Add title
     ax.set_title(title, fontsize=16, weight='bold')
 
-    # Convert plot to base64-encoded PNG
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
     plt.close(fig)
     buf.seek(0)
     img_data = base64.b64encode(buf.read()).decode('utf-8')
-
     return img_data
