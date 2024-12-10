@@ -44,11 +44,19 @@ floating_date_picker = dbc.Container([
         })
 ], fluid=True)
 
-navbar = dbc.NavbarSimple(
-    brand="PFIFA! - Personal Functional Interactive Fitness Analysis",
-    brand_href="#",
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            html.H4(
+                "PFIFA! - Personal Functional Interactive Fitness Analysis",
+                className="mx-auto",  # Centers the text
+                style={"color": "white", "margin": "0"}
+            )
+        ],
+        fluid=True
+    ),
     color="primary",
-    dark=True,
+    dark=True
 )
 
 app.layout = html.Div([
