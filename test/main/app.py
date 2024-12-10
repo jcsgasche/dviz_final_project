@@ -10,6 +10,7 @@ from modules.callbacks.data_callbacks import register_data_callbacks
 from modules.callbacks.ui_callbacks import register_ui_callbacks
 from modules.callbacks.barchart_callbacks import register_barchart_callbacks
 from modules.callbacks.activity_breakdown_callbacks import register_activity_breakdown_callbacks
+from modules.callbacks.musclemap_callbacks import register_musclemap_callbacks
 
 THEME = dbc.themes.LUX
 
@@ -88,10 +89,12 @@ app.layout = html.Div([
     ], fluid=True, className="py-4")
 ], style={'backgroundColor': '#f8f9fa', 'minHeight': '100vh'})
 
+# Register all callbacks
 register_data_callbacks(app)
 register_ui_callbacks(app)
 register_barchart_callbacks(app)
 register_activity_breakdown_callbacks(app)
+register_musclemap_callbacks(app)  # Added this line
 
 if __name__ == '__main__':
     app.run_server(debug=True)
