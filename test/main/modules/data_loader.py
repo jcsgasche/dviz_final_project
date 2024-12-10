@@ -12,22 +12,7 @@ def fetch_garmin_data(username, password):
         client.login()
         activities = client.get_activities(0, 30)
 
-        activity_data = {
-            "startTimeLocal": [],
-            'steps': [],
-            'calories': [],
-            "distance": [],
-            "averageHR": [],
-        }
-
-        for activity in activities:
-            activity_data['startTimeLocal'].append(activity["startTimeLocal"])
-            activity_data['steps'].append(activity.get('steps', 0))
-            activity_data['calories'].append(activity.get('calories', 0))
-            activity_data['distance'].append(activity.get("distance", 0) / 1000)
-            activity_data['averageHR'].append(activity.get("averageHR", 0))
-
-        df = pd.DataFrame(activity_data)
+        df = pd.DataFrame(activities)
         return df, "Data fetched successfully from Garmin."
     except Exception as e:
         print(f"Error fetching Garmin data: {e}")

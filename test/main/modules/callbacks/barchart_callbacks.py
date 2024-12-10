@@ -1,7 +1,7 @@
 # modules/callbacks/barchart_callbacks.py
 from dash import Input, Output, State, callback_context, html, dcc, ALL
 import pandas as pd
-from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units, METRIC_LABEL_MAP
+from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units, create_summary_chart, METRIC_LABEL_MAP
 import json
 import dash
 
@@ -95,6 +95,57 @@ def register_barchart_callbacks(app):
         if not stored_goals:
             return get_default_goals()[selected_metric]
         return stored_goals.get(selected_metric, get_default_goals()[selected_metric])
+
+    @app.callback(
+        [Output('activity-graph', 'style'),
+         Output('summary-graph', 'style'),
+         Output('view-type', 'data'),
+         Output('metric-selector-container', 'style'),
+         Output('quick-goal-container', 'style')],
+        [Input('toggle-summary-view', 'n_clicks')],
+        [State('view-type', 'data')]
+    )
+    def toggle_view(n_clicks, current_view):
+        if n_clicks is None:
+            return ({'display': 'block'},
+                    {'display': 'none'},
+                    'detail',
+                    {'width': '50%', 'marginBottom': '20px', 'display': 'block'},
+                    {'display': 'block'})
+
+        if current_view == 'detail':
+            return ({'display': 'none'},
+                    {'display': 'block'},
+                    'summary',
+                    {'width': '50%', 'marginBottom': '20px', 'display': 'none'},
+                    {'display': 'none'})
+        else:
+            return ({'display': 'block'},
+                    {'display': 'none'},
+                    'detail',
+                    {'width': '50%', 'marginBottom': '20px', 'display': 'block'},
+                    {'display': 'block'})
+
+    @app.callback(
+        Output('summary-graph', 'figure'),
+        [Input('date-range', 'start_date'),
+         Input('date-range', 'end_date'),
+         Input('stored-data', 'data'),
+         Input('stored-goals', 'data'),
+         Input('view-type', 'data')]
+    )
+    def update_summary_chart(start_date, end_date, stored_data, stored_goals, view_type):
+        if not stored_data or not stored_goals or view_type == 'detail':
+            return {}
+
+        df = pd.DataFrame(stored_data)
+        df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
+
+        # Filter data for selected date range
+        mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
+        filtered_df = df.loc[mask]
+
+        return create_summary_chart(filtered_df, start_date, end_date, stored_goals)
 
 def create_goals_display(goals):
     """Create a formatted display of all current goals with editable inputs"""
