@@ -58,7 +58,6 @@ def register_musclemap_callbacks(app):
         img_data = musclemap_plot.plot_muscle_map(
             processed_data,
             muscle_coordinates,
-            title=f"Muscle Activity ({start_date} to {end_date})",
             zoom_out_factor=1.5
         )
 

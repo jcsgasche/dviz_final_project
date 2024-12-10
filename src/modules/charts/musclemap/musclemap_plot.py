@@ -64,7 +64,7 @@ def load_and_parse_muscle_coordinates(filename):
                         })
     return parsed_data.get("Front", {})
 
-def plot_muscle_map(processed_strength_activities, muscle_coordinates, title, zoom_out_factor=1.5):
+def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_factor=1.5):
     # Calculate repetitions
     primary_reps = {}
     secondary_reps = {}
@@ -109,8 +109,6 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, title, zo
 
             polygon = Polygon(coords, closed=True, facecolor=color, edgecolor="black", linewidth=0.5)
             ax.add_patch(polygon)
-
-    ax.set_title(title, fontsize=16, weight='bold')
 
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
