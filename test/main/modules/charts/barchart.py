@@ -18,7 +18,7 @@ def get_default_goals():
         'distance': 5,  # km
         'averageSpeed': 10,  # km/h
         'maxSpeed': 15,  # km/h
-        'movingDuration': 45,  # minutes
+        'movingDuration': 900,  # minutes
         'moderateIntensityMinutes': 30,
         'vigorousIntensityMinutes': 20,
         'elevationGain': 100,  # meters
@@ -105,10 +105,10 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
     ])
 
 def create_summary_chart(df, start_date, end_date, stored_goals):
-    """Create a summary chart showing all metrics' performance against their goals"""
+    """Create a summary chart showing all metrics' performance as percentage of their goals"""
     summary_data = {}
 
-    # Calculate mean for each metric in the period
+    # Calculate mean for each metric in the period and convert to percentage of goal
     for metric in METRIC_OPTIONS:
         metric_key = metric['value']
         if metric_key in df.columns:
@@ -122,10 +122,14 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
             mean_value = values.mean()
             goal_value = stored_goals.get(metric_key, get_default_goals()[metric_key])
 
+            # Calculate percentage of goal reached
+            percentage = (mean_value / goal_value * 100) if goal_value != 0 else 0
+
             summary_data[metric_key] = {
-                'mean': mean_value,
-                'goal': goal_value,
-                'reached': mean_value >= goal_value
+                'percentage': percentage,
+                'mean': mean_value,  # Keep raw value for hover info
+                'goal': goal_value,  # Keep goal for hover info
+                'reached': percentage >= 100
             }
 
     # Create the summary bar chart
@@ -133,57 +137,71 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
 
     # Prepare data for plotting
     metrics = []
-    means = []
-    goals = []
+    percentages = []
     colors = []
+    hover_texts = []
 
     # Sort metrics by their labels
     sorted_metrics = sorted(summary_data.keys(), key=lambda x: METRIC_LABEL_MAP.get(x, x))
 
     for metric in sorted_metrics:
         data = summary_data[metric]
-        metrics.append(METRIC_LABEL_MAP.get(metric, metric.replace('_', ' ').title()))
-        means.append(data['mean'])
-        goals.append(data['goal'])
+        metric_label = METRIC_LABEL_MAP.get(metric, metric.replace('_', ' ').title())
+        metrics.append(metric_label)
+        percentages.append(data['percentage'])
         colors.append('green' if data['reached'] else 'red')
 
-    # Add bars for actual values
+        # Create detailed hover text
+        units = get_metric_units(metric)
+        hover_texts.append(
+            f"Metric: {metric_label}<br>" +
+            f"Goal: {data['goal']:.1f} {units}<br>" +
+            f"Average: {data['mean']:.1f} {units}<br>" +
+            f"Percentage: {data['percentage']:.1f}%"
+        )
+
+    # Add bars for percentage values
     fig.add_trace(go.Bar(
         x=metrics,
-        y=means,
+        y=percentages,
         marker_color=colors,
-        name='Average Value',
-        text=[f"{v:.1f}" for v in means],
+        name='% of Goal',
+        text=[f"{p:.1f}%" for p in percentages],
         textposition='auto',
+        hovertext=hover_texts,
+        hoverinfo='text'
     ))
 
-    # Add markers for goals
+    # Add 100% goal line
     fig.add_trace(go.Scatter(
         x=metrics,
-        y=goals,
-        mode='markers',
-        name='Goal',
-        marker=dict(
-            symbol='diamond',
-            size=10,
+        y=[100] * len(metrics),
+        mode='lines',
+        name='Goal (100%)',
+        line=dict(
             color='blue',
+            dash='dash'
         )
     ))
 
     # Customize layout
     fig.update_layout(
-        title='Summary of All Metrics (Period Average vs Goals)',
+        title='Summary of All Metrics (Percentage of Goals Reached)',
         xaxis_title='Metrics',
-        yaxis_title='Value',
+        yaxis_title='Percentage of Goal (%)',
         xaxis=dict(
             tickangle=45,
             tickmode='array',
             ticktext=metrics,
             tickvals=list(range(len(metrics)))
         ),
+        yaxis=dict(
+            range=[0, max(max(percentages) * 1.1, 120)],  # Make sure 100% line is visible
+        ),
         showlegend=True,
-        height=600,  # Make it taller to accommodate all metrics
-        margin=dict(b=150)  # Add bottom margin for rotated labels
+        height=600,
+        margin=dict(b=150),  # Add bottom margin for rotated labels
+        hovermode='closest'
     )
 
     return fig
