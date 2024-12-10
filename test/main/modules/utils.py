@@ -19,15 +19,16 @@ def create_data_layout():
                     {'label': 'Upload Local Dataset', 'value': 'upload'}
                 ],
                 value='garmin',
-                labelStyle={'display': 'inline-block', 'margin-right': '20px'}
+                labelStyle={'display': 'inline-block', 'margin-right': '30px'},
+                inputStyle={"margin-right": "5px"}
             )
         ], style={'margin-bottom': '20px'}),
 
         html.Div([
-            html.Label("Garmin Email:"),
+            html.Label("Garmin Email:", style={'marginRight': '10px', 'marginBottom': '10px'}),
             dcc.Input(id='garmin-email', type='email', placeholder='Enter your Garmin email', style={'width': '300px'}),
             html.Br(),
-            html.Label("Garmin Password:   "),
+            html.Label("Garmin Password:", style={'marginRight': '10px'}),
             dcc.Input(id='garmin-password', type='password', placeholder='Enter your Garmin password', style={'width': '300px'}),
             html.Br(),
             html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'})

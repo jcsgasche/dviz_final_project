@@ -49,6 +49,14 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
                 )
             ], style={'marginBottom': '20px'}),
 
+            # Toggle button
+            html.Button(
+                "Toggle Summary View",
+                id='toggle-summary-view',
+                n_clicks=0,
+                style={'marginBottom': '10px'}
+            ),
+
             # Metric selector container
             html.Div([
                 html.Label("Select Metric:"),
@@ -75,14 +83,6 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
                     }
                 )
             ], id='quick-goal-container'),
-
-            # Toggle button
-            html.Button(
-                "Toggle Summary View",
-                id='toggle-summary-view',
-                n_clicks=0,
-                style={'marginTop': '20px'}
-            ),
         ]),
 
         # Container for both graphs
