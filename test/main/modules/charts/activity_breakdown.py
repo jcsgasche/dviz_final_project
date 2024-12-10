@@ -60,6 +60,40 @@ def create_activity_breakdown_chart(df, selected_metric):
 
     metric_config = METRIC_CONFIGS[selected_metric]
 
+    # Check if there's any data
+    if len(df) == 0:
+        # Create an empty donut chart with "No data" message
+        fig = go.Figure(data=[go.Pie(
+            labels=['No Data'],
+            values=[1],
+            hole=0.5,
+            textinfo='none',
+            marker=dict(colors=['#E0E0E0']),  # Light gray color
+            hoverinfo='none'
+        )])
+
+        # Add "No data" text in the center
+        fig.add_annotation(
+            text="No data available<br>in this period of time",
+            x=0.5,
+            y=0.5,
+            showarrow=False,
+            font=dict(size=14),
+            align='center'
+        )
+
+        # Update layout for empty state
+        fig.update_layout(
+            showlegend=False,
+            height=600,
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            margin=dict(t=80, l=20, r=20, b=20),
+            font=dict(family="Arial, sans-serif")
+        )
+
+        return fig
+
     if selected_metric == 'count':
         # For count, get frequency of each activity type
         breakdown = df['activity_type_label'].value_counts()
