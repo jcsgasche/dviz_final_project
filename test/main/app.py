@@ -1,4 +1,4 @@
-from dash import Dash, html
+from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from pathlib import Path
 
@@ -19,20 +19,31 @@ app = Dash(__name__,
 
 first_day_last_month, last_day_last_month = calculate_date_range()
 
+floating_date_picker = dbc.Container([
+    dbc.Card([
+        dbc.CardBody([
+            html.H6("Date Range", className="mb-3"),
+            dcc.DatePickerRange(
+                id='date-range',
+                start_date=first_day_last_month.date(),
+                end_date=last_day_last_month.date(),
+                className="mb-2"
+            ),
+        ])
+    ], className="shadow-sm",
+        style={
+            'position': 'fixed',
+            'top': '80px',  # Below navbar
+            'right': '20px',
+            'zIndex': 1000,
+            'width': 'auto',
+            'minWidth': '300px',
+            'backgroundColor': 'white',
+            'borderRadius': '4px'
+        })
+], fluid=True)
+
 navbar = dbc.NavbarSimple(
-    children=[
-        dbc.NavItem(dbc.NavLink("Dashboard", href="#")),
-        dbc.DropdownMenu(
-            children=[
-                dbc.DropdownMenuItem("More", header=True),
-                dbc.DropdownMenuItem("Settings", href="#"),
-                dbc.DropdownMenuItem("Help", href="#"),
-            ],
-            nav=True,
-            in_navbar=True,
-            label="More",
-        ),
-    ],
     brand="PFIFA! - Personal Functional Interactive Fitness Analysis",
     brand_href="#",
     color="primary",
@@ -41,6 +52,7 @@ navbar = dbc.NavbarSimple(
 
 app.layout = html.Div([
     navbar,
+    floating_date_picker,
     dbc.Container([
         dbc.Row([
             dbc.Col([

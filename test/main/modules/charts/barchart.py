@@ -39,16 +39,6 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
 
         # Container for controls
         html.Div([
-            # Date range picker
-            html.Div([
-                html.Label("Select Time Frame:"),
-                dcc.DatePickerRange(
-                    id='date-range',
-                    start_date=first_day_last_month.date(),
-                    end_date=last_day_last_month.date()
-                )
-            ], style={'marginBottom': '20px'}),
-
             # Toggle button
             html.Button(
                 "Toggle Summary View",
@@ -240,15 +230,6 @@ METRIC_LABEL_MAP = {opt['value']: opt['label'] for opt in METRIC_OPTIONS}
 
 def create_metric_controls(first_day_last_month, last_day_last_month):
     return html.Div([
-        html.Div([
-            html.Label("Select Time Frame:"),
-            dcc.DatePickerRange(
-                id='date-range',
-                start_date=first_day_last_month.date(),
-                end_date=last_day_last_month.date()
-            )
-        ], style={'marginBottom': '20px'}),
-
         html.Div([
             html.Label("Select Metric:"),
             dcc.Dropdown(
