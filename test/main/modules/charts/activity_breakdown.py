@@ -51,7 +51,7 @@ def create_activity_breakdown_layout():
             config={'displayModeBar': True,
                     'modeBarButtonsToRemove': ['lasso2d', 'select2d']}
         )
-    ], style={'padding': '20px', 'backgroundColor': 'white', 'borderRadius': '5px', 'marginTop': '20px'})
+    ])
 
 def create_activity_breakdown_chart(df, selected_metric):
     # Process activity types and get the metric configuration
