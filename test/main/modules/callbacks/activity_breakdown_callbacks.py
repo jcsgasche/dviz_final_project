@@ -11,7 +11,8 @@ def register_activity_breakdown_callbacks(app):
     )
     def update_activity_breakdown(selected_metric, start_date, end_date, stored_data):
         if not stored_data:
-            return {}
+            from modules.charts.activity_breakdown import create_activity_breakdown_chart
+            return create_activity_breakdown_chart(None, selected_metric)
 
         df = pd.DataFrame(stored_data)
         df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])

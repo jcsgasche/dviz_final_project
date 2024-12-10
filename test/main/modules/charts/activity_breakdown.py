@@ -53,46 +53,52 @@ def create_activity_breakdown_layout():
         )
     ])
 
+def create_empty_donut_chart(message):
+    fig = go.Figure(data=[go.Pie(
+        labels=['No Data'],
+        values=[1],
+        hole=0.5,
+        textinfo='none',
+        marker=dict(colors=['#E0E0E0']),  # Light gray color
+        hoverinfo='none'
+    )])
+
+    # Add message text in the center
+    fig.add_annotation(
+        text=message,
+        x=0.5,
+        y=0.5,
+        showarrow=False,
+        font=dict(size=14),
+        align='center'
+    )
+
+    # Update layout for empty state
+    fig.update_layout(
+        showlegend=False,
+        height=600,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(t=80, l=20, r=20, b=20),
+        font=dict(family="Arial, sans-serif")
+    )
+
+    return fig
+
 def create_activity_breakdown_chart(df, selected_metric):
+    # If df is None or empty (initial state, no data loaded)
+    if df is None:
+        return create_empty_donut_chart("Waiting for you to add<br>your personal fitness data")
+
     # Process activity types and get the metric configuration
     df['activity_type'] = df['activityType'].apply(lambda x: x['typeKey'] if isinstance(x, dict) else 'unknown')
     df['activity_type_label'] = df['activity_type'].map(ACTIVITY_TYPE_LABELS)
 
     metric_config = METRIC_CONFIGS[selected_metric]
 
-    # Check if there's any data
+    # Check if there's any data in the filtered period
     if len(df) == 0:
-        # Create an empty donut chart with "No data" message
-        fig = go.Figure(data=[go.Pie(
-            labels=['No Data'],
-            values=[1],
-            hole=0.5,
-            textinfo='none',
-            marker=dict(colors=['#E0E0E0']),  # Light gray color
-            hoverinfo='none'
-        )])
-
-        # Add "No data" text in the center
-        fig.add_annotation(
-            text="No data available<br>in this period of time",
-            x=0.5,
-            y=0.5,
-            showarrow=False,
-            font=dict(size=14),
-            align='center'
-        )
-
-        # Update layout for empty state
-        fig.update_layout(
-            showlegend=False,
-            height=600,
-            plot_bgcolor='white',
-            paper_bgcolor='white',
-            margin=dict(t=80, l=20, r=20, b=20),
-            font=dict(family="Arial, sans-serif")
-        )
-
-        return fig
+        return create_empty_donut_chart("No data available<br>in this period of time")
 
     if selected_metric == 'count':
         # For count, get frequency of each activity type
