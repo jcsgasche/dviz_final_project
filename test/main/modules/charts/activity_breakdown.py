@@ -35,7 +35,7 @@ BREAKDOWN_METRICS = [
 
 def create_activity_breakdown_layout():
     return html.Div([
-        html.H2("Activity Type Breakdown", className="chart-title"),
+        html.H1("Activity Type Breakdown", className="chart-title"),
         html.Div([
             html.Label("Select Metric:", className="dropdown-label"),
             dcc.Dropdown(

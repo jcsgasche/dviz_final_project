@@ -1,60 +1,80 @@
-from dash import Dash, html, dcc
-import json
+from dash import Dash, html
+import dash_bootstrap_components as dbc
 from pathlib import Path
 
 from modules.charts.barchart import create_barchart_layout
 from modules.charts.activity_breakdown import create_activity_breakdown_layout
-from modules.utils import calculate_date_range, create_general_layout
+from modules.utils import calculate_date_range, create_data_layout
+from modules.callbacks.data_callbacks import register_data_callbacks
 from modules.callbacks.ui_callbacks import register_ui_callbacks
 from modules.callbacks.barchart_callbacks import register_barchart_callbacks
 from modules.callbacks.activity_breakdown_callbacks import register_activity_breakdown_callbacks
-from modules.callbacks.muscledata_callbacks import register_muscledata_callbacks
 
-app = Dash(__name__)
+# BOOTSTRAP, CERULEAN, COSMO, CYBORG, DARKLY, FLATLY, JOURNAL, LITERA, LUMEN,
+# LUX, MATERIA, MINTY, MORPH, PULSE, QUARTZ, SANDSTONE, SIMPLEX, SKETCHY,
+# SLATE, SOLAR, SPACELAB, SUPERHERO, UNITED, VAPOR, YETI, ZEPHYR
+THEME = dbc.themes.LUX
+
+# Initialize the Dash app with the theme
+app = Dash(__name__,
+           external_stylesheets=[THEME],
+           suppress_callback_exceptions=True)
+
 first_day_last_month, last_day_last_month = calculate_date_range()
 
+# Create the navbar
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Dashboard", href="#")),
+        dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem("More", header=True),
+                dbc.DropdownMenuItem("Settings", href="#"),
+                dbc.DropdownMenuItem("Help", href="#"),
+            ],
+            nav=True,
+            in_navbar=True,
+            label="More",
+        ),
+    ],
+    brand="PFIFA! - Personal Functional Interactive Fitness Analysis",
+    brand_href="#",
+    color="primary",
+    dark=True,
+)
+
+# Main layout with Bootstrap components
 app.layout = html.Div([
-    # General layout and existing charts
-    create_general_layout(),
-    create_barchart_layout(first_day_last_month, last_day_last_month),
-    create_activity_breakdown_layout(),
+    navbar,
+    dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody(create_data_layout())
+                ], className="mb-4 shadow")
+            ])
+        ]),
 
-    # Add Garmin login and data fetch UI
-    html.H2("Garmin Data Fetch & Muscle Map"),
-    html.Div([
-        html.Label("Garmin Email:"),
-        dcc.Input(
-            id='garmin-email', type='email',
-            placeholder='Enter your Garmin email',
-            style={'width': '300px'}
-        ),
-        html.Br(),
-        html.Label("Garmin Password:"),
-        dcc.Input(
-            id='garmin-password', type='password',
-            placeholder='Enter your Garmin password',
-            style={'width': '300px'}
-        ),
-        html.Br(),
-        html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'}),
-        html.Div(id='garmin-status', style={'margin-top': '10px', 'color': 'green'}),
-    ], style={'margin-bottom': '20px'}),
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody(create_barchart_layout(first_day_last_month, last_day_last_month))
+                ], className="mb-4 shadow")
+            ])
+        ]),
 
-    # Hidden stores for fetched and processed data
-    dcc.Store(id='strength-data-store'),
-    dcc.Store(id='processed-strength-data-store'),
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody(create_activity_breakdown_layout())
+                ], className="mb-4 shadow")
+            ])
+        ])
+    ], fluid=True, className="py-4")
+], style={'backgroundColor': '#f8f9fa', 'minHeight': '100vh'})
 
-    # Display muscle map
-    html.Div([
-        html.H2("Muscle Map"),
-        html.Img(id='muscle-map-image', style={'max-width': '100%', 'height': 'auto'})
-    ], style={'margin-top': '20px'})
-])
-
-# Removed register_data_callbacks(app) to avoid duplicate outputs
-# If data_callbacks are necessary, ensure they do not produce the same output or rename their outputs.
-# register_data_callbacks(app) 
-
+# Register callbacks
+register_data_callbacks(app)
 register_ui_callbacks(app)
 register_barchart_callbacks(app)
 register_activity_breakdown_callbacks(app)

@@ -8,10 +8,8 @@ def calculate_date_range():
     last_day_last_month = today.replace(day=1) - timedelta(days=1)
     return first_day_last_month, last_day_last_month
 
-def create_general_layout():
+def create_data_layout():
     return html.Div([
-        html.H1("PFIFA! - Personal Functional Interactive Fitness Analysis"),
-
         html.H1("Load Data"),
         html.Div([
             dcc.RadioItems(
@@ -29,7 +27,7 @@ def create_general_layout():
             html.Label("Garmin Email:"),
             dcc.Input(id='garmin-email', type='email', placeholder='Enter your Garmin email', style={'width': '300px'}),
             html.Br(),
-            html.Label("Garmin Password:"),
+            html.Label("Garmin Password:   "),
             dcc.Input(id='garmin-password', type='password', placeholder='Enter your Garmin password', style={'width': '300px'}),
             html.Br(),
             html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'})
