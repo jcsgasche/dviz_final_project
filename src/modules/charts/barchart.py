@@ -194,10 +194,23 @@ def create_metric_controls(first_day_last_month, last_day_last_month):
     ])
 
 def create_empty_chart(message):
-    """Create an empty chart with a perfectly centered message and no default rendering"""
+    """Create an empty chart with a centered message and greyed out background bars"""
     fig = go.Figure()
 
-    # Add centered message with xanchor and yanchor for perfect centering
+    # Create background bar chart data
+    background_x = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    background_y = [30, 45, 25, 60, 40, 35, 50]
+
+    # Add grey background bars
+    fig.add_trace(go.Bar(
+        x=background_x,
+        y=background_y,
+        marker_color='rgba(200, 200, 200, 0.2)',  # Very light grey
+        showlegend=False,
+        hoverinfo='skip'
+    ))
+
+    # Add centered message
     fig.add_annotation(
         text=message,
         x=0.5,
@@ -208,10 +221,11 @@ def create_empty_chart(message):
         font=dict(size=14),
         xanchor='center',
         yanchor='middle',
-        align='center'
+        align='center',
+        bgcolor='rgba(255, 255, 255, 0.9)'  # Semi-transparent white background
     )
 
-    # Update layout with specific settings to prevent default rendering
+    # Update layout
     fig.update_layout(
         showlegend=False,
         height=600,
@@ -220,17 +234,16 @@ def create_empty_chart(message):
         margin=dict(t=80, l=20, r=20, b=20),
         font=dict(family="Arial, sans-serif"),
         xaxis=dict(
-            visible=False,
-            showticklabels=False,
+            showticklabels=False,  # Hide x-axis labels
             showgrid=False,
-            range=[-1, 1]
+            zeroline=False
         ),
         yaxis=dict(
-            visible=False,
-            showticklabels=False,
+            showticklabels=False,  # Hide y-axis labels
             showgrid=False,
-            range=[-1, 1]
+            zeroline=False
         ),
+        # Ensure the bars are behind the message
         annotations=[{
             'text': message,
             'x': 0.5,
@@ -241,7 +254,10 @@ def create_empty_chart(message):
             'font': {'size': 14},
             'xanchor': 'center',
             'yanchor': 'middle',
-            'align': 'center'
+            'align': 'center',
+            'bgcolor': 'rgba(255, 255, 255, 0.9)',
+            'bordercolor': 'rgba(0, 0, 0, 0)',
+            'borderwidth': 0
         }]
     )
 

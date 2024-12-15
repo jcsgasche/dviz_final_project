@@ -4,12 +4,13 @@ from pathlib import Path
 
 from modules.charts.barchart import create_barchart_layout
 from modules.charts.activity_breakdown import create_activity_breakdown_layout
-from modules.charts.musclemap import create_musclemap_layout
+from modules.charts.musclemap.musclemap import create_musclemap_layout
 from modules.utils import calculate_date_range, create_data_layout
 from modules.callbacks.data_callbacks import register_data_callbacks
 from modules.callbacks.ui_callbacks import register_ui_callbacks
 from modules.callbacks.barchart_callbacks import register_barchart_callbacks
 from modules.callbacks.activity_breakdown_callbacks import register_activity_breakdown_callbacks
+from modules.callbacks.musclemap_callbacks import register_musclemap_callbacks
 
 THEME = dbc.themes.LUX
 
@@ -43,11 +44,19 @@ floating_date_picker = dbc.Container([
         })
 ], fluid=True)
 
-navbar = dbc.NavbarSimple(
-    brand="PFIFA! - Personal Functional Interactive Fitness Analysis",
-    brand_href="#",
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            html.H4(
+                "PFIFA! - Personal Functional Interactive Fitness Analysis",
+                className="mx-auto",  # Centers the text
+                style={"color": "white", "margin": "0"}
+            )
+        ],
+        fluid=True
+    ),
     color="primary",
-    dark=True,
+    dark=True
 )
 
 app.layout = html.Div([
@@ -88,10 +97,12 @@ app.layout = html.Div([
     ], fluid=True, className="py-4")
 ], style={'backgroundColor': '#f8f9fa', 'minHeight': '100vh'})
 
+# Register all callbacks
 register_data_callbacks(app)
 register_ui_callbacks(app)
 register_barchart_callbacks(app)
 register_activity_breakdown_callbacks(app)
+register_musclemap_callbacks(app)  # Added this line
 
 if __name__ == '__main__':
     app.run_server(debug=True)
