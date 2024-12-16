@@ -566,7 +566,6 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
 
     fig.update_layout(
         title=f"{metric_label} Over Time",
-        xaxis_title='Date',
         yaxis_title=f"{metric_label} ({units})",
         xaxis=dict(
             tickformat="%b %d",
