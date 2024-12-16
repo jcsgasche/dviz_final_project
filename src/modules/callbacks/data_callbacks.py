@@ -30,13 +30,10 @@ def register_data_callbacks(app):
                 api = Garmin(username, password)
                 api.login()
 
-                # Fetch general activities
-                activities = api.get_activities(0, 30)
-                activities_df = pd.DataFrame(activities)
-
-                # Fetch strength training activities
+                # Fetch all activities first
                 start = 0
                 limit = 100
+                all_activities = []
                 strength_activities = []
                 more_activities = True
 
@@ -48,12 +45,20 @@ def register_data_callbacks(app):
                     for activity in batch:
                         if activity['activityType']['typeKey'] == 'strength_training':
                             strength_activities.append(activity)
+                        all_activities.append(activity)
 
                     if len(batch) < limit:
                         break
                     start += limit
 
-                return activities_df.to_dict('records'), json.dumps(strength_activities), "Data fetched successfully from Garmin."
+                # Convert all activities to DataFrame for regular charts
+                activities_df = pd.DataFrame(all_activities)
+
+                return (
+                    activities_df.to_dict('records'),
+                    json.dumps(strength_activities),
+                    "Data fetched successfully from Garmin."
+                )
 
             except Exception as e:
                 return None, None, f"Error: {str(e)}"
@@ -64,12 +69,36 @@ def register_data_callbacks(app):
 
             try:
                 if 'json' in filename.lower():
+                    # Parse the uploaded JSON
                     data = json.loads(decoded)
-                    df = pd.DataFrame(data)
-                    return df.to_dict('records'), json.dumps([]), f"File '{filename}' processed successfully."
+
+                    # Process all activities regardless of type
+                    all_activities = []
+                    strength_activities = []
+
+                    # Handle both single object and list formats
+                    activities_list = data if isinstance(data, list) else [data]
+
+                    for activity in activities_list:
+                        # Add to strength activities if it has exercise sets
+                        if 'summarizedExerciseSets' in activity:
+                            strength_activities.append(activity)
+                        # Add all activities to the main list
+                        all_activities.append(activity)
+
+                    # Convert to DataFrame for regular charts
+                    activities_df = pd.DataFrame(all_activities)
+
+                    return (
+                        activities_df.to_dict('records'),
+                        json.dumps(strength_activities),
+                        f"File '{filename}' processed successfully."
+                    )
                 else:
                     return None, None, "Please upload a JSON file."
+
             except Exception as e:
+                print(f"Error processing file: {str(e)}")  # For debugging
                 return None, None, f"Error processing file: {str(e)}"
 
         return None, None, ""
