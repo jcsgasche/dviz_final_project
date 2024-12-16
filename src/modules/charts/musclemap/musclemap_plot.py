@@ -1,4 +1,3 @@
-# modules/musclemap/musclemap_plot.py
 import os
 import sys
 import json
@@ -63,24 +62,6 @@ def load_and_parse_muscle_coordinates(filename):
                             "style": path_data["style"]
                         })
     return parsed_data.get("Front", {})
-
-# modules/charts/musclemap/musclemap_plot.py
-import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-import io
-import base64
-
-# modules/charts/musclemap/musclemap_plot.py
-import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-import io
-import base64
-
-# modules/charts/musclemap/musclemap_plot.py
-import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-import io
-import base64
 
 def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Waiting for you to add\nyour personal fitness data"):
     """Create an empty muscle map with grey muscles and a message"""
