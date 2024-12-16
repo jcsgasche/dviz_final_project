@@ -53,23 +53,16 @@ def create_activity_breakdown_layout():
     ])
 
 def create_empty_donut_chart(message):
+    """Create an empty donut chart with matching style to other empty charts"""
     fig = go.Figure(data=[go.Pie(
         labels=['No Data'],
         values=[1],
         hole=0.5,
         textinfo='none',
-        marker=dict(colors=['#E0E0E0']),
-        hoverinfo='none'
+        marker=dict(colors=['rgba(200, 200, 200, 0.2)']),  # Match the light grey from other charts
+        hoverinfo='none',
+        showlegend=False
     )])
-
-    fig.add_annotation(
-        text=message,
-        x=0.5,
-        y=0.5,
-        showarrow=False,
-        font=dict(size=14),
-        align='center',
-    )
 
     fig.update_layout(
         showlegend=False,
@@ -78,8 +71,21 @@ def create_empty_donut_chart(message):
         paper_bgcolor='white',
         margin=dict(t=80, l=20, r=20, b=20),
         font=dict(family="Arial, sans-serif"),
+        # Add centered annotation matching other charts
         annotations=[{
-            'font': {'size': 18}
+            'text': message,
+            'x': 0.5,
+            'y': 0.5,
+            'xref': 'paper',
+            'yref': 'paper',
+            'showarrow': False,
+            'font': {'size': 18},
+            'xanchor': 'center',
+            'yanchor': 'middle',
+            'align': 'center',
+            'bgcolor': 'rgba(255, 255, 255, 0.9)',
+            'bordercolor': 'rgba(0, 0, 0, 0)',
+            'borderwidth': 0
         }]
     )
 
