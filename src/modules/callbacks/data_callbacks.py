@@ -5,6 +5,7 @@ import base64
 import io
 import json
 from garminconnect import Garmin
+from datetime import datetime
 
 def register_data_callbacks(app):
     @app.callback(
@@ -102,3 +103,40 @@ def register_data_callbacks(app):
                 return None, None, f"Error processing file: {str(e)}"
 
         return None, None, ""
+
+    @app.callback(
+        Output("download-section", "style"),
+        [Input("stored-data", "data")]
+    )
+    def show_download_section(data):
+        if data:
+            return {'marginTop': '20px', 'display': 'block'}
+        return {'marginTop': '20px', 'display': 'none'}
+
+    @app.callback(
+        Output("download-data", "data"),
+        Input("btn-download", "n_clicks"),
+        [State("download-type", "value"),
+         State("stored-data", "data"),
+         State("strength-data-store", "data")],
+        prevent_initial_call=True
+    )
+    def download_data(n_clicks, download_type, all_data, strength_data):
+        if not n_clicks:
+            return None
+
+        # Generate timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        if download_type == 'all' and all_data:
+            return dict(
+                content=json.dumps(all_data, indent=2),
+                filename=f"garmin_activities_{timestamp}.json"
+            )
+        elif download_type == 'strength' and strength_data:
+            return dict(
+                content=strength_data,  # strength_data is already JSON string
+                filename=f"garmin_strength_activities_{timestamp}.json"
+            )
+
+        return None

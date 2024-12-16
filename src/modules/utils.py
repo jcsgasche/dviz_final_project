@@ -36,7 +36,26 @@ def create_data_layout():
 
         html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
         html.Div(id='garmin-status', style={'margin-top': '10px', 'color': 'green'}),
+
+        # Add download section
+        html.Div([
+            html.Hr(style={'margin': '20px 0'}),
+            html.H6("Download Data"),
+            dcc.Dropdown(
+                id='download-type',
+                options=[
+                    {'label': 'All Activities', 'value': 'all'},
+                    {'label': 'Strength Activities Only', 'value': 'strength'}
+                ],
+                value='all',
+                style={'width': '300px', 'marginBottom': '10px'}
+            ),
+            html.Button("Download Data", id="btn-download", n_clicks=0,
+                        style={'marginRight': '10px'}),
+            dcc.Download(id="download-data")
+        ], id='download-section', style={'marginTop': '20px', 'display': 'none'})
     ])
+
 
 def create_upload_section():
     return [
