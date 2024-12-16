@@ -36,7 +36,6 @@ def create_data_layout():
 
         html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
         html.Div(id='garmin-status', style={'margin-top': '10px', 'color': 'green'}),
-        html.Div(create_refresh_section(), id='refresh-section', style={'margin-bottom': '20px'}),
     ])
 
 def create_upload_section():
