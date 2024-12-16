@@ -44,7 +44,7 @@ def create_activity_breakdown_layout():
                 clearable=False,
                 style={'width': '200px'}
             )
-        ], style={'marginBottom': '20px', 'marginTop': '10px'}),
+        ], style={'marginBottom': '20px', 'marginTop': '10px'}, id='breakdown-metric-container'),
         dcc.Graph(
             id='activity-breakdown-chart',
             config={'displayModeBar': True,
