@@ -1,6 +1,7 @@
 # modules/charts/musclemap/musclemap.py
 from dash import html, dcc
 import plotly.graph_objects as go
+import json
 
 def create_musclemap_layout():
     """Create the layout for the muscle map visualization with spider chart toggle"""
@@ -62,11 +63,25 @@ def create_spider_chart(processed_data, start_date, end_date):
         except json.JSONDecodeError:
             return create_empty_spider_chart("No data available<br>in this period of time")
 
-    # Initialize counters for muscle groups
+    # Initialize counters for muscle groups with full names
     muscle_activity = {
-        'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
-        'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
-        'BackGlutes': 0, 'BackHamstrings': 0
+        'Front Chest': 0, 'Back Lats': 0, 'Front Deltoids': 0, 'Back Deltoids': 0,
+        'Front Abs': 0, 'Back Triceps': 0, 'Front Biceps': 0, 'Front Quads': 0,
+        'Back Glutes': 0, 'Back Hamstrings': 0
+    }
+
+    # Mapping of internal names to display names
+    muscle_name_mapping = {
+        'FrontChest': 'Front Chest',
+        'BackLats': 'Back Lats',
+        'FrontDelts': 'Front Deltoids',
+        'BackDelts': 'Back Deltoids',
+        'FrontAbs': 'Front Abs',
+        'BackTriceps': 'Back Triceps',
+        'FrontBiceps': 'Front Biceps',
+        'FrontQuads': 'Front Quads',
+        'BackGlutes': 'Back Glutes',
+        'BackHamstrings': 'Back Hamstrings'
     }
 
     # Process each activity
@@ -78,15 +93,17 @@ def create_spider_chart(processed_data, start_date, end_date):
             for muscle in exercise['primary_muscles']:
                 if muscle != 'Undefined':
                     base_muscle = muscle.replace('Right', '').replace('Left', '')
-                    if base_muscle in muscle_activity:
-                        muscle_activity[base_muscle] += reps * 1.0
+                    display_name = muscle_name_mapping.get(base_muscle)
+                    if display_name in muscle_activity:
+                        muscle_activity[display_name] += reps * 1.0
 
             # Process secondary muscles
             for muscle in exercise['secondary_muscles']:
                 if muscle != 'Undefined':
                     base_muscle = muscle.replace('Right', '').replace('Left', '')
-                    if base_muscle in muscle_activity:
-                        muscle_activity[base_muscle] += reps * 0.5
+                    display_name = muscle_name_mapping.get(base_muscle)
+                    if display_name in muscle_activity:
+                        muscle_activity[display_name] += reps * 0.5
 
     # Remove muscle groups with no activity
     active_muscles = {k: v for k, v in muscle_activity.items() if v > 0}
@@ -107,11 +124,12 @@ def create_spider_chart(processed_data, start_date, end_date):
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
-                showticklabels=False,  # Just hide the number labels
+                showticklabels=True,  # Show the numeric values
                 range=[0, max(active_muscles.values()) * 1.1]
             ),
             angularaxis=dict(
-                showticklabels=False  # Just hide the text labels
+                showticklabels=True,  # Show the muscle labels
+                tickfont=dict(size=12)  # Adjust font size as needed
             )
         ),
         showlegend=False,
