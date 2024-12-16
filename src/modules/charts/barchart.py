@@ -152,7 +152,7 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         y0=100,
         y1=100,
         line=dict(
-            color="blue",
+            color="#3b9c4e",
             width=2,
             dash="dash",
         ),
@@ -168,7 +168,7 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         y0=75,
         y1=75,
         line=dict(
-            color="orange",
+            color="#f5c43d",
             width=2,
             dash="dot",
         ),
@@ -183,7 +183,7 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         mode='lines',
         name='Goal (100%)',
         line=dict(
-            color='blue',
+            color='#3b9c4e',
             dash='dash'
         ),
         showlegend=True
@@ -195,7 +195,7 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         mode='lines',
         name='Goal Almost Reached (75%)',
         line=dict(
-            color='orange',
+            color='#f5c43d',
             dash='dot'
         ),
         showlegend=True
@@ -548,7 +548,7 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
         y=[goal_value, goal_value],
         mode='lines',
         name='Goal (100%)',
-        line=dict(color='blue', dash='dash')
+        line=dict(color='#3b9c4e', dash='dash')
     ))
 
     # Add 75% goal line
@@ -557,7 +557,7 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
         y=[0.75 * goal_value, 0.75 * goal_value],
         mode='lines',
         name='Goal Almost Reached (75%)',
-        line=dict(color='orange', dash='dot')
+        line=dict(color='#f5c43d', dash='dot')
     ))
 
     # Customize layout
