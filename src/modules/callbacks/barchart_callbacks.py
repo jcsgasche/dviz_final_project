@@ -54,10 +54,13 @@ def register_barchart_callbacks(app):
          Input('date-range', 'end_date'),
          Input('stored-data', 'data'),
          Input('stored-goals', 'data'),
-         Input('view-type', 'data')],
+         Input('view-type', 'data'),
+         Input('summary-type', 'value'),
+         Input('summary-metrics-selector', 'value')],
         prevent_initial_call=True
     )
-    def update_summary_chart(start_date, end_date, stored_data, stored_goals, view_type):
+    def update_summary_chart(start_date, end_date, stored_data, stored_goals,
+                             view_type, summary_type, selected_metrics):
         if not stored_data or not stored_goals or view_type == 'detail':
             return create_empty_chart("Waiting for you to add<br>your personal fitness data")
 
@@ -70,7 +73,10 @@ def register_barchart_callbacks(app):
         if len(filtered_df) == 0:
             return create_empty_chart("No data available<br>in this period of time")
 
-        return create_summary_chart(filtered_df, start_date, end_date, stored_goals)
+        # Pass selected metrics only if in custom mode
+        metrics_to_show = selected_metrics if summary_type == 'custom' else None
+        return create_summary_chart(filtered_df, start_date, end_date,
+                                    stored_goals, metrics_to_show)
 
     @app.callback(
         [Output('stored-goals', 'data'),
@@ -143,7 +149,8 @@ def register_barchart_callbacks(app):
          Output('summary-graph', 'style'),
          Output('view-type', 'data'),
          Output('metric-selector-container', 'style'),
-         Output('quick-goal-container', 'style')],
+         Output('quick-goal-container', 'style'),
+         Output('summary-controls', 'style')],  # Added this output
         [Input('toggle-summary-view', 'n_clicks')],
         [State('view-type', 'data')]
     )
@@ -153,20 +160,32 @@ def register_barchart_callbacks(app):
                     {'display': 'none'},
                     'detail',
                     {'width': '50%', 'marginBottom': '20px', 'display': 'block'},
-                    {'display': 'block'})
+                    {'display': 'block'},
+                    {'display': 'none'})  # Hide summary controls initially
 
         if current_view == 'detail':
             return ({'display': 'none'},
                     {'display': 'block'},
                     'summary',
                     {'width': '50%', 'marginBottom': '20px', 'display': 'none'},
-                    {'display': 'none'})
+                    {'display': 'none'},
+                    {'display': 'block'})  # Show summary controls
         else:
             return ({'display': 'block'},
                     {'display': 'none'},
                     'detail',
                     {'width': '50%', 'marginBottom': '20px', 'display': 'block'},
-                    {'display': 'block'})
+                    {'display': 'block'},
+                    {'display': 'none'})  # Hide summary controls
+
+    @app.callback(
+        Output('summary-metrics-dropdown', 'style'),
+        [Input('summary-type', 'value')]
+    )
+    def toggle_metrics_dropdown(summary_type):
+        if summary_type == 'custom':
+            return {'display': 'block'}
+        return {'display': 'none'}
 
 def create_goals_display(goals):
     """Create a formatted display of all current goals with editable inputs"""

@@ -4,6 +4,9 @@ import plotly.graph_objects as go
 import pandas as pd
 import dash
 import json
+from dash import dcc, html, Input, Output, State, ALL
+import dash_bootstrap_components as dbc
+
 
 def get_default_goals():
     """Return default goals for each metric"""
@@ -32,31 +35,33 @@ def get_default_goals():
         'maxTemperature': 25,  # °C
     }
 
-def create_summary_chart(df, start_date, end_date, stored_goals):
-    """Create a summary chart showing all metrics' performance as percentage of their goals"""
+def create_summary_chart(df, start_date, end_date, stored_goals, selected_metrics=None):
+    """Create a summary chart showing metrics' performance as percentage of their goals"""
     summary_data = {}
 
+    # Determine which metrics to display
+    metrics_to_show = selected_metrics if selected_metrics else [opt['value'] for opt in METRIC_OPTIONS]
+
     # Calculate mean for each metric in the period and convert to percentage of goal
-    for metric in METRIC_OPTIONS:
-        metric_key = metric['value']
-        if metric_key in df.columns:
+    for metric in metrics_to_show:
+        if metric in df.columns:
             # Apply any necessary conversions
-            values = df[metric_key]
-            if metric_key == 'duration':
+            values = df[metric]
+            if metric == 'duration':
                 values = values / 60  # Convert to minutes
-            elif metric_key == 'distance':
+            elif metric == 'distance':
                 values = values / 1000  # Convert to kilometers
 
             mean_value = values.mean()
-            goal_value = stored_goals.get(metric_key, get_default_goals()[metric_key])
+            goal_value = stored_goals.get(metric, get_default_goals()[metric])
 
             # Calculate percentage of goal reached
             percentage = (mean_value / goal_value * 100) if goal_value != 0 else 0
 
-            summary_data[metric_key] = {
+            summary_data[metric] = {
                 'percentage': percentage,
-                'mean': mean_value,  # Keep raw value for hover info
-                'goal': goal_value,  # Keep goal for hover info
+                'mean': mean_value,
+                'goal': goal_value,
                 'reached': percentage >= 100
             }
 
@@ -297,8 +302,37 @@ def create_initial_loading_div():
         )
     ], id='initial-loading-div')
 
+# Add this function after create_metric_controls:
+def create_summary_controls():
+    return html.Div([
+        # Toggle between full/custom summary
+        html.Div([
+            dbc.RadioItems(
+                id='summary-type',
+                options=[
+                    {'label': 'All Metrics', 'value': 'all'},
+                    {'label': 'Custom Selection', 'value': 'custom'}
+                ],
+                value='all',
+                inline=True,
+                className="mb-3"
+            ),
+        ]),
+
+        # Dropdown for selecting metrics (initially hidden)
+        html.Div([
+            dcc.Dropdown(
+                id='summary-metrics-selector',
+                options=METRIC_OPTIONS,
+                value=[METRIC_OPTIONS[0]['value']],  # Default to first metric
+                multi=True,
+                placeholder="Select metrics to display...",
+            )
+        ], id='summary-metrics-dropdown', style={'display': 'none'})
+    ])
+
+# Update the create_data_loaded_div function to include the new controls:
 def create_data_loaded_div(first_day_last_month, last_day_last_month):
-    """Create the complete div for when data is loaded"""
     return html.Div([
         html.H1("Goal/Reached Dashboard"),
 
@@ -312,7 +346,14 @@ def create_data_loaded_div(first_day_last_month, last_day_last_month):
                 style={'marginBottom': '10px'}
             ),
 
-            # Metric selector container
+            # Summary view controls (initially hidden)
+            html.Div(
+                create_summary_controls(),
+                id='summary-controls',
+                style={'display': 'none'}
+            ),
+
+            # Rest of the existing controls...
             html.Div([
                 html.Label("Select Metric:"),
                 dcc.Dropdown(
