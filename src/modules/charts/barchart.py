@@ -421,8 +421,7 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
         # The data loaded div (hidden initially)
         create_data_loaded_div(first_day_last_month, last_day_last_month),
 
-        # Store components for data persistence
-        dcc.Store(id='stored-data'),
+        # Only keep the stores that aren't in app.py
         dcc.Store(id='stored-goals', data=get_default_goals()),
         dcc.Store(id='view-type', data='detail')
     ])
