@@ -13,9 +13,11 @@ def register_musclemap_callbacks(app):
          Output('muscle-spider-chart', 'figure')],
         [Input('strength-data-store', 'data'),
          Input('date-range', 'start_date'),
-         Input('date-range', 'end_date')]
+         Input('date-range', 'end_date'),
+         Input('stored-data', 'modified_timestamp')],  # Add this to trigger on data load
+        [State('stored-data', 'data')]  # Add this to access persisted data
     )
-    def update_muscle_visualizations(raw_data, start_date, end_date):
+    def update_muscle_visualizations(raw_data, start_date, end_date, ts, stored_data):
         if not raw_data:
             # Create empty muscle map image
             script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +31,10 @@ def register_musclemap_callbacks(app):
             empty_src = f"data:image/png;base64,{empty_img}"
             return None, empty_src, create_empty_spider_chart()
 
-        strength_activities = json.loads(raw_data)
+        try:
+            strength_activities = json.loads(raw_data)
+        except (json.JSONDecodeError, TypeError):
+            return None, None, create_empty_spider_chart("Error processing data")
 
         # Filter activities by date range
         filtered_activities = []

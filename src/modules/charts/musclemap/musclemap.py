@@ -3,10 +3,11 @@ from dash import html, dcc
 import plotly.graph_objects as go
 import json
 
+# modules/charts/musclemap/musclemap.py
 def create_musclemap_layout():
     """Create the layout for the muscle map visualization with spider chart toggle"""
     return html.Div([
-        html.H1("Muscle Activity Map"),  # Match barchart font
+        html.H1("Muscle Activity Map"),
 
         # Toggle button container
         html.Div([
@@ -44,8 +45,7 @@ def create_musclemap_layout():
                 ),
             ], id='spider-chart-container', style={'display': 'none'}),
 
-            # Store components
-            dcc.Store(id='strength-data-store'),
+            # Store components - only keep those not in app.py
             dcc.Store(id='processed-strength-data-store'),
             dcc.Store(id='muscle-view-type', data='map'),
         ])
