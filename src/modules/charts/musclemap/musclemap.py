@@ -2,54 +2,6 @@
 from dash import html, dcc
 import plotly.graph_objects as go
 
-def create_empty_spider_chart(message="Waiting for you to add<br>your personal fitness data"):
-    """Create an empty spider chart with default muscle groups and message"""
-    empty_muscles = {
-        'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
-        'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
-        'BackGlutes': 0, 'BackHamstrings': 0
-    }
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(
-        r=list(empty_muscles.values()),
-        theta=list(empty_muscles.keys()),
-        fill='toself',
-        name='Muscle Activity'
-    ))
-
-    fig.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 1]
-            )
-        ),
-        showlegend=False,
-        height=600,
-        plot_bgcolor='white',
-        paper_bgcolor='white'
-    )
-
-    # Add centered annotation matching barchart style
-    fig.add_annotation(
-        text=message,
-        x=0.5,
-        y=0.5,
-        xref="paper",
-        yref="paper",
-        showarrow=False,
-        font=dict(
-            size=18
-        ),
-        xanchor='center',
-        yanchor='middle',
-        align='center',
-        bgcolor='rgba(255, 255, 255, 0.9)'  # Semi-transparent white background
-    )
-
-    return fig
-
 def create_musclemap_layout():
     """Create the layout for the muscle map visualization with spider chart toggle"""
     return html.Div([
@@ -155,12 +107,64 @@ def create_spider_chart(processed_data, start_date, end_date):
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
-                visible=True,
+                showticklabels=False,  # Just hide the number labels
                 range=[0, max(active_muscles.values()) * 1.1]
+            ),
+            angularaxis=dict(
+                showticklabels=False  # Just hide the text labels
             )
         ),
         showlegend=False,
         height=600
+    )
+
+    return fig
+
+def create_empty_spider_chart(message="Waiting for you to add<br>your personal fitness data"):
+    """Create an empty spider chart with default muscle groups and message"""
+    empty_muscles = {
+        'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
+        'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
+        'BackGlutes': 0, 'BackHamstrings': 0
+    }
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatterpolar(
+        r=list(empty_muscles.values()),
+        theta=list(empty_muscles.keys()),
+        fill='toself',
+        name='Muscle Activity'
+    ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                showticklabels=False,  # Just hide the number labels
+                range=[0, 1]
+            ),
+            angularaxis=dict(
+                showticklabels=False  # Just hide the text labels
+            )
+        ),
+        showlegend=False,
+        height=600
+    )
+
+    # Add centered annotation matching barchart style
+    fig.add_annotation(
+        text=message,
+        x=0.5,
+        y=0.5,
+        xref="paper",
+        yref="paper",
+        showarrow=False,
+        font=dict(
+            size=18
+        ),
+        xanchor='center',
+        yanchor='middle',
+        align='center',
+        bgcolor='rgba(255, 255, 255, 0.9)'
     )
 
     return fig
