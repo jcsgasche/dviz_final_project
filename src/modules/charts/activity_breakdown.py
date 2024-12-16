@@ -89,11 +89,13 @@ def create_empty_donut_chart(message):
     return fig
 
 def create_activity_breakdown_chart(df, selected_metric):
-    # If df is None or empty (initial state, no data loaded)
     if df is None:
         return create_empty_donut_chart("Waiting for you to add<br>your personal fitness data")
 
-    # Process activity types and get the metric configuration
+    # Create an explicit copy
+    df = df.copy()
+
+    # Now these operations will be safe
     df['activity_type'] = df['activityType'].apply(lambda x: x['typeKey'] if isinstance(x, dict) else 'unknown')
     df['activity_type_label'] = df['activity_type'].map(ACTIVITY_TYPE_LABELS)
 
