@@ -121,7 +121,7 @@ def create_spider_chart(processed_data, start_date, end_date):
     return fig
 
 def create_empty_spider_chart(message="Waiting for you to add<br>your personal fitness data"):
-    """Create an empty spider chart with default muscle groups and message"""
+    """Create an empty spider chart with default muscle groups and message, matching barchart style"""
     empty_muscles = {
         'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
         'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
@@ -129,42 +129,60 @@ def create_empty_spider_chart(message="Waiting for you to add<br>your personal f
     }
 
     fig = go.Figure()
+
+    # Add the trace with explicit styling for every component
     fig.add_trace(go.Scatterpolar(
         r=list(empty_muscles.values()),
         theta=list(empty_muscles.keys()),
         fill='toself',
-        name='Muscle Activity'
+        name='Muscle Activity',
+        fillcolor='rgba(200, 200, 200, 0.2)',  # Background color matching barchart
+        line=dict(
+            color='rgba(150, 150, 150, 0.5)',  # Darker grey for lines
+            width=1
+        ),
+        opacity=1,  # Ensure full opacity
+        showlegend=False
     ))
 
     fig.update_layout(
         polar=dict(
+            bgcolor='rgba(200, 200, 200, 0.2)',  # Set polar background color
             radialaxis=dict(
-                showticklabels=False,  # Just hide the number labels
-                range=[0, 1]
+                showticklabels=False,
+                range=[0, 1],
+                linecolor='rgba(150, 150, 150, 0.5)',
+                gridcolor='rgba(150, 150, 150, 0.5)',
+                layer='below traces'  # Ensure grid is below the trace
             ),
             angularaxis=dict(
-                showticklabels=False  # Just hide the text labels
-            )
+                showticklabels=False,
+                linecolor='rgba(150, 150, 150, 0.5)',
+                gridcolor='rgba(150, 150, 150, 0.5)',
+                layer='below traces'  # Ensure grid is below the trace
+            ),
+            domain=dict(x=[0, 1], y=[0, 1])  # Ensure proper sizing
         ),
         showlegend=False,
-        height=600
-    )
-
-    # Add centered annotation matching barchart style
-    fig.add_annotation(
-        text=message,
-        x=0.5,
-        y=0.5,
-        xref="paper",
-        yref="paper",
-        showarrow=False,
-        font=dict(
-            size=18
-        ),
-        xanchor='center',
-        yanchor='middle',
-        align='center',
-        bgcolor='rgba(255, 255, 255, 0.9)'
+        height=600,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        # Add centered annotation matching barchart style
+        annotations=[{
+            'text': message,
+            'x': 0.5,
+            'y': 0.5,
+            'xref': 'paper',
+            'yref': 'paper',
+            'showarrow': False,
+            'font': {'size': 18},
+            'xanchor': 'center',
+            'yanchor': 'middle',
+            'align': 'center',
+            'bgcolor': 'rgba(255, 255, 255, 0.9)',
+            'bordercolor': 'rgba(0, 0, 0, 0)',
+            'borderwidth': 0
+        }]
     )
 
     return fig
