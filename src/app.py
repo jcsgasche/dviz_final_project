@@ -7,7 +7,6 @@ from modules.charts.activity_breakdown import create_activity_breakdown_layout
 from modules.charts.musclemap.musclemap import create_musclemap_layout
 from modules.utils import calculate_date_range, create_data_layout
 from modules.callbacks.data_callbacks import register_data_callbacks
-from modules.callbacks.ui_callbacks import register_ui_callbacks
 from modules.callbacks.barchart_callbacks import register_barchart_callbacks
 from modules.callbacks.activity_breakdown_callbacks import register_activity_breakdown_callbacks
 from modules.callbacks.musclemap_callbacks import register_musclemap_callbacks
@@ -19,6 +18,13 @@ app = Dash(__name__,
            suppress_callback_exceptions=True)
 
 first_day_last_month, last_day_last_month = calculate_date_range()
+
+# Data stores container
+data_stores = html.Div([
+    dcc.Store(id='stored-data', storage_type='local'),
+    dcc.Store(id='strength-data-store', storage_type='local'),
+    dcc.Store(id='last-update-time', storage_type='local'),
+])
 
 floating_date_picker = dbc.Container([
     dbc.Card([
@@ -34,7 +40,7 @@ floating_date_picker = dbc.Container([
     ], className="shadow-sm",
         style={
             'position': 'fixed',
-            'top': '80px',  # Below navbar
+            'top': '80px',
             'right': '20px',
             'zIndex': 1000,
             'width': 'auto',
@@ -49,7 +55,7 @@ navbar = dbc.Navbar(
         [
             html.H4(
                 "PFIFA! - Personal Functional Interactive Fitness Analysis",
-                className="mx-auto",  # Centers the text
+                className="mx-auto",
                 style={"color": "white", "margin": "0"}
             )
         ],
@@ -61,6 +67,11 @@ navbar = dbc.Navbar(
 
 app.layout = html.Div([
     navbar,
+    # All data stores in one place
+    data_stores,
+    # Status container for messages
+    html.Div(id='data-status-container'),
+
     floating_date_picker,
     dbc.Container([
         dbc.Row([
@@ -99,10 +110,9 @@ app.layout = html.Div([
 
 # Register all callbacks
 register_data_callbacks(app)
-register_ui_callbacks(app)
 register_barchart_callbacks(app)
 register_activity_breakdown_callbacks(app)
-register_musclemap_callbacks(app)  # Added this line
+register_musclemap_callbacks(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

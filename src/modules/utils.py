@@ -1,4 +1,3 @@
-# modules/utils.py
 from datetime import datetime, timedelta
 from dash import dcc, html
 
@@ -24,19 +23,77 @@ def create_data_layout():
             )
         ], style={'margin-bottom': '20px'}),
 
+        # Data input section
         html.Div([
-            html.Label("Garmin Email:", style={'marginRight': '10px', 'marginBottom': '10px'}),
-            dcc.Input(id='garmin-email', type='email', placeholder='Enter your Garmin email', style={'width': '300px'}),
-            html.Br(),
-            html.Label("Garmin Password:", style={'marginRight': '10px'}),
-            dcc.Input(id='garmin-password', type='password', placeholder='Enter your Garmin password', style={'width': '300px'}),
-            html.Br(),
-            html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'})
-        ], id='garmin-login', style={'display': 'block'}),
+            # Garmin login section
+            html.Div([
+                html.Label("Garmin Email:", style={'marginRight': '10px', 'marginBottom': '10px'}),
+                dcc.Input(id='garmin-email', type='email', placeholder='Enter your Garmin email', style={'width': '300px'}),
+                html.Br(),
+                html.Label("Garmin Password:", style={'marginRight': '10px'}),
+                dcc.Input(id='garmin-password', type='password', placeholder='Enter your Garmin password', style={'width': '300px'}),
+                html.Br(),
+                html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'})
+            ], id='garmin-login', style={'display': 'block'}),
 
-        html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
-        html.Div(id='garmin-status', style={'margin-top': '10px', 'color': 'green'}),
-        html.Div(create_refresh_section(), id='refresh-section', style={'margin-bottom': '20px'}),
+            # File upload section
+            html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
+
+            # Status message container - single container for both messages
+            html.Div(style={
+                'marginTop': '20px',
+                'padding': '10px 0',
+                'borderTop': '1px solid #eee',
+                'borderBottom': '1px solid #eee',
+                'minHeight': '50px',  # Ensure consistent height
+                'display': 'flex',
+                'alignItems': 'center'  # Vertical centering
+            }, children=[
+                # Remove the separate garmin-status div and use data-status-container only
+                html.Div(id='data-status-container')
+            ]),
+
+        ], style={'marginBottom': '20px'}),
+
+        # Last update time display
+        html.Div([
+            html.Hr(style={'margin': '20px 0'}),
+            html.P(id='last-update-display', style={'color': '#666', 'fontStyle': 'italic'}),
+        ]),
+
+        # Rest of the layout remains the same...
+        html.Div([
+            html.Hr(style={'margin': '20px 0'}),
+            html.H6("Download Data"),
+            dcc.Dropdown(
+                id='download-type',
+                options=[
+                    {'label': 'All Activities', 'value': 'all'},
+                    {'label': 'Strength Activities Only', 'value': 'strength'}
+                ],
+                value='all',
+                style={'width': '300px', 'marginBottom': '10px'}
+            ),
+            html.Button("Download Data", id="btn-download", n_clicks=0,
+                        style={'marginRight': '10px'}),
+            dcc.Download(id="download-data")
+        ], id='download-section', style={'marginTop': '20px', 'display': 'none'}),
+
+        html.Div([
+            html.Hr(style={'margin': '20px 0'}),
+            html.Button(
+                "Clear Stored Data",
+                id="clear-data-button",
+                n_clicks=0,
+                style={
+                    'backgroundColor': '#dc3545',
+                    'color': 'white',
+                    'border': 'none',
+                    'padding': '10px 20px',
+                    'borderRadius': '4px'
+                }
+            ),
+        ], id='clear-data-section', style={'marginTop': '20px', 'display': 'none'})
     ])
 
 def create_upload_section():
@@ -54,10 +111,8 @@ def create_upload_section():
                 'textAlign': 'center',
                 'margin': '10px'
             },
+            contents=None,  # Initialize with no contents
             multiple=False
         ),
         html.Div(id='upload-status', style={'margin-top': '10px', 'color': 'green'})
     ]
-
-def create_refresh_section():
-    return html.Button('Refresh Data', id='refresh-button', n_clicks=0)

@@ -1,4 +1,3 @@
-# modules/musclemap/musclemap_plot.py
 import os
 import sys
 import json
@@ -64,8 +63,77 @@ def load_and_parse_muscle_coordinates(filename):
                         })
     return parsed_data.get("Front", {})
 
+def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Waiting for you to add\nyour personal fitness data"):
+    """Create an empty muscle map with grey muscles and a message"""
+    fig, ax = plt.subplots(figsize=(19.8, 10.8))
+
+    xlim = (-110 * zoom_out_factor, 700 * zoom_out_factor)
+    ylim = (-25 * zoom_out_factor, 575 * zoom_out_factor)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    ax.set_aspect('equal')
+    ax.axis('off')
+
+    # Draw all muscles in light grey
+    for muscle_group, polygons in muscle_coordinates.items():
+        for polygon_data in polygons:
+            coords = polygon_data["coords"]
+            if not coords or len(coords) < 3:
+                continue
+
+            polygon = Polygon(coords, closed=True, facecolor="lightgrey",
+                              edgecolor="black", linewidth=0.5)
+            ax.add_patch(polygon)
+
+    # Add centered message
+    center_x = (xlim[0] + xlim[1]) / 2
+    center_y = (ylim[0] + ylim[1]) / 2
+
+    # Match Plotly's style more closely
+    bg_box = dict(
+        boxstyle='square,pad=0.6',  # Changed from round to square with less padding
+        facecolor='white',
+        alpha=0.9,
+        edgecolor='none'
+    )
+
+    # Replace HTML <br> with actual newlines for matplotlib
+    message = message.replace("<br>", "\n")
+
+    plt.text(center_x, center_y, message,
+             horizontalalignment='center',
+             verticalalignment='center',
+             fontsize=18,
+             color='#000000',
+             bbox=bg_box,
+             linespacing=1.2)  # Adjusted line spacing to match Plotly
+
+    buf = io.BytesIO()
+    # Increased DPI for sharper text
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
+    plt.close(fig)
+    buf.seek(0)
+    img_data = base64.b64encode(buf.read()).decode('utf-8')
+    return img_data
+
 def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_factor=1.5):
-    # Calculate repetitions
+    """Plot the muscle map with activity data"""
+    if not processed_strength_activities:
+        return create_empty_muscle_map(muscle_coordinates, zoom_out_factor,
+                                       message="No data available\nin this period of time")
+
+    # Rest of the function remains the same...
+
+    # Rest of the function remains the same...
+    if not processed_strength_activities:
+        return create_empty_muscle_map(muscle_coordinates, zoom_out_factor)
+
+    # Rest of the original function remains the same...
+
+    # Rest of the original function remains the same...
+
+    # Rest of the original function remains the same...    # Calculate repetitions
     primary_reps = {}
     secondary_reps = {}
 

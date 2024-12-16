@@ -4,6 +4,9 @@ import plotly.graph_objects as go
 import pandas as pd
 import dash
 import json
+from dash import dcc, html, Input, Output, State, ALL
+import dash_bootstrap_components as dbc
+
 
 def get_default_goals():
     """Return default goals for each metric"""
@@ -32,32 +35,35 @@ def get_default_goals():
         'maxTemperature': 25,  # °C
     }
 
-def create_summary_chart(df, start_date, end_date, stored_goals):
-    """Create a summary chart showing all metrics' performance as percentage of their goals"""
+def create_summary_chart(df, start_date, end_date, stored_goals, selected_metrics=None):
+    """Create a summary chart showing metrics' performance as percentage of their goals"""
     summary_data = {}
 
+    # Determine which metrics to display
+    metrics_to_show = selected_metrics if selected_metrics else [opt['value'] for opt in METRIC_OPTIONS]
+
     # Calculate mean for each metric in the period and convert to percentage of goal
-    for metric in METRIC_OPTIONS:
-        metric_key = metric['value']
-        if metric_key in df.columns:
+    for metric in metrics_to_show:
+        if metric in df.columns:
             # Apply any necessary conversions
-            values = df[metric_key]
-            if metric_key == 'duration':
+            values = df[metric]
+            if metric == 'duration':
                 values = values / 60  # Convert to minutes
-            elif metric_key == 'distance':
+            elif metric == 'distance':
                 values = values / 1000  # Convert to kilometers
 
             mean_value = values.mean()
-            goal_value = stored_goals.get(metric_key, get_default_goals()[metric_key])
+            goal_value = stored_goals.get(metric, get_default_goals()[metric])
 
             # Calculate percentage of goal reached
             percentage = (mean_value / goal_value * 100) if goal_value != 0 else 0
 
-            summary_data[metric_key] = {
+            summary_data[metric] = {
                 'percentage': percentage,
-                'mean': mean_value,  # Keep raw value for hover info
-                'goal': goal_value,  # Keep goal for hover info
-                'reached': percentage >= 100
+                'mean': mean_value,
+                'goal': goal_value,
+                'reached': percentage >= 100,
+                'almost_reached': 75 <= percentage < 100
             }
 
     # Create the summary bar chart
@@ -65,19 +71,33 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
 
     # Prepare data for plotting
     metrics = []
-    percentages = []
-    colors = []
+    percentages_reached = []
+    percentages_almost_reached = []
+    percentages_not_reached = []
     hover_texts = []
 
     # Sort metrics by their labels
     sorted_metrics = sorted(summary_data.keys(), key=lambda x: METRIC_LABEL_MAP.get(x, x))
+    valid_values = [p for p in (percentages_reached + percentages_almost_reached + percentages_not_reached) if p is not None]
 
     for metric in sorted_metrics:
         data = summary_data[metric]
         metric_label = METRIC_LABEL_MAP.get(metric, metric.replace('_', ' ').title())
         metrics.append(metric_label)
-        percentages.append(data['percentage'])
-        colors.append('green' if data['reached'] else 'red')
+
+        percentage = data['percentage']
+        if data['reached']:
+            percentages_reached.append(percentage)
+            percentages_almost_reached.append(None)
+            percentages_not_reached.append(None)
+        elif data['almost_reached']:
+            percentages_reached.append(None)
+            percentages_almost_reached.append(percentage)
+            percentages_not_reached.append(None)
+        else:
+            percentages_reached.append(None)
+            percentages_almost_reached.append(None)
+            percentages_not_reached.append(percentage)
 
         # Create detailed hover text
         units = get_metric_units(metric)
@@ -88,28 +108,97 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
             f"Percentage: {data['percentage']:.1f}%"
         )
 
-    # Add bars for percentage values
+    # Add bars for goals reached
     fig.add_trace(go.Bar(
         x=metrics,
-        y=percentages,
-        marker_color=colors,
-        name='% of Goal',
-        text=[f"{p:.1f}%" for p in percentages],
+        y=percentages_reached,
+        marker_color='green',
+        name='Goal Reached',
+        text=[f"{p:.1f}%" if p is not None else "" for p in percentages_reached],
+        textposition='auto',
+        hovertext=hover_texts,
+        hoverinfo='text'
+    ))
+
+    # Add bars for goals almost reached
+    fig.add_trace(go.Bar(
+        x=metrics,
+        y=percentages_almost_reached,
+        marker_color='orange',
+        name='Goal Almost Reached',
+        text=[f"{p:.1f}%" if p is not None else "" for p in percentages_almost_reached],
+        textposition='auto',
+        hovertext=hover_texts,
+        hoverinfo='text'
+    ))
+
+    # Add bars for goals not reached
+    fig.add_trace(go.Bar(
+        x=metrics,
+        y=percentages_not_reached,
+        marker_color='red',
+        name='Goal Not Reached',
+        text=[f"{p:.1f}%" if p is not None else "" for p in percentages_not_reached],
         textposition='auto',
         hovertext=hover_texts,
         hoverinfo='text'
     ))
 
     # Add 100% goal line
+    fig.add_shape(
+        type="line",
+        x0=0,
+        x1=1,
+        y0=100,
+        y1=100,
+        line=dict(
+            color="#3b9c4e",
+            width=2,
+            dash="dash",
+        ),
+        xref="paper",
+        yref="y"
+    )
+
+    # Add 75% goal line
+    fig.add_shape(
+        type="line",
+        x0=0,
+        x1=1,
+        y0=75,
+        y1=75,
+        line=dict(
+            color="#f5c43d",
+            width=2,
+            dash="dot",
+        ),
+        xref="paper",
+        yref="y"
+    )
+
+    # Add the goal lines to legend
     fig.add_trace(go.Scatter(
-        x=metrics,
-        y=[100] * len(metrics),
+        x=[None],
+        y=[None],
         mode='lines',
         name='Goal (100%)',
         line=dict(
-            color='blue',
+            color='#3b9c4e',
             dash='dash'
-        )
+        ),
+        showlegend=True
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=[None],
+        y=[None],
+        mode='lines',
+        name='Goal Almost Reached (75%)',
+        line=dict(
+            color='#f5c43d',
+            dash='dot'
+        ),
+        showlegend=True
     ))
 
     # Customize layout
@@ -124,12 +213,13 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
             tickvals=list(range(len(metrics)))
         ),
         yaxis=dict(
-            range=[0, max(max(percentages) * 1.1, 120)],  # Make sure 100% line is visible
+            range=[0, max(max(valid_values) * 1.1, 120) if valid_values else 120],  # Ensure visibility
         ),
         showlegend=True,
         height=600,
         margin=dict(b=150),  # Add bottom margin for rotated labels
-        hovermode='closest'
+        hovermode='closest',
+        barmode='overlay'  # Ensures bars don't stack
     )
 
     return fig
@@ -206,6 +296,7 @@ def create_empty_chart(message):
         x=background_x,
         y=background_y,
         marker_color='rgba(200, 200, 200, 0.2)',  # Very light grey
+        marker_line=dict(color='rgba(150, 150, 150, 0.5)', width=1),  # Add this line
         showlegend=False,
         hoverinfo='skip'
     ))
@@ -251,7 +342,7 @@ def create_empty_chart(message):
             'xref': 'paper',
             'yref': 'paper',
             'showarrow': False,
-            'font': {'size': 14},
+            'font': {'size': 18},
             'xanchor': 'center',
             'yanchor': 'middle',
             'align': 'center',
@@ -277,8 +368,37 @@ def create_initial_loading_div():
         )
     ], id='initial-loading-div')
 
+# Add this function after create_metric_controls:
+def create_summary_controls():
+    return html.Div([
+        # Toggle between full/custom summary
+        html.Div([
+            dbc.RadioItems(
+                id='summary-type',
+                options=[
+                    {'label': 'All Metrics', 'value': 'all'},
+                    {'label': 'Custom Selection', 'value': 'custom'}
+                ],
+                value='all',
+                inline=True,
+                className="mb-3"
+            ),
+        ]),
+
+        # Dropdown for selecting metrics (initially hidden)
+        html.Div([
+            dcc.Dropdown(
+                id='summary-metrics-selector',
+                options=METRIC_OPTIONS,
+                value=[METRIC_OPTIONS[0]['value']],  # Default to first metric
+                multi=True,
+                placeholder="Select metrics to display...",
+            )
+        ], id='summary-metrics-dropdown', style={'display': 'none'})
+    ])
+
+# Update the create_data_loaded_div function to include the new controls:
 def create_data_loaded_div(first_day_last_month, last_day_last_month):
-    """Create the complete div for when data is loaded"""
     return html.Div([
         html.H1("Goal/Reached Dashboard"),
 
@@ -286,13 +406,20 @@ def create_data_loaded_div(first_day_last_month, last_day_last_month):
         html.Div([
             # Toggle button
             html.Button(
-                "Toggle Summary View",
+                "Toggle View",
                 id='toggle-summary-view',
                 n_clicks=0,
                 style={'marginBottom': '10px'}
             ),
 
-            # Metric selector container
+            # Summary view controls (initially hidden)
+            html.Div(
+                create_summary_controls(),
+                id='summary-controls',
+                style={'display': 'none'}
+            ),
+
+            # Rest of the existing controls...
             html.Div([
                 html.Label("Select Metric:"),
                 dcc.Dropdown(
@@ -343,14 +470,12 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
         # The data loaded div (hidden initially)
         create_data_loaded_div(first_day_last_month, last_day_last_month),
 
-        # Store components for data persistence
-        dcc.Store(id='stored-data'),
+        # Only keep the stores that aren't in app.py
         dcc.Store(id='stored-goals', data=get_default_goals()),
         dcc.Store(id='view-type', data='detail')
     ])
 
 def create_activity_chart(df, selected_metric, start_date, end_date, goal_value):
-    # If df is None (initial state, no data loaded)
     if df is None:
         return create_empty_chart("Waiting for you to add<br>your personal fitness data")
 
@@ -363,23 +488,22 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
     mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
     filtered_df = df.loc[mask]
 
-    # Check if there's any data in the filtered period
     if len(filtered_df) == 0:
         return create_empty_chart("No data available<br>in this period of time")
 
-    # For metrics that might not exist in all activities
     if selected_metric not in filtered_df.columns:
         filtered_df[selected_metric] = 0
 
     goal_reached = filtered_df[filtered_df[selected_metric] >= goal_value]
-    goal_not_reached = filtered_df[filtered_df[selected_metric] < goal_value]
+    goal_almost_reached = filtered_df[(filtered_df[selected_metric] >= 0.75 * goal_value) &
+                                      (filtered_df[selected_metric] < goal_value)]
+    goal_not_reached = filtered_df[filtered_df[selected_metric] < 0.75 * goal_value]
 
-    # Create activity type markers
     activity_types = filtered_df['activityType'].apply(lambda x: x['typeKey'] if isinstance(x, dict) else 'unknown')
 
     fig = go.Figure()
 
-    # Add bars for goal reached activities
+    # Add bars for "Goal Reached"
     fig.add_trace(go.Bar(
         x=goal_reached['startTimeLocal'],
         y=goal_reached[selected_metric],
@@ -392,7 +516,20 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
                       "<extra></extra>"
     ))
 
-    # Add bars for activities not reaching goal
+    # Add bars for "Goal Almost Reached"
+    fig.add_trace(go.Bar(
+        x=goal_almost_reached['startTimeLocal'],
+        y=goal_almost_reached[selected_metric],
+        marker_color='orange',
+        name='Goal Almost Reached',
+        text=activity_types[goal_almost_reached.index],
+        hovertemplate="Date: %{x}<br>" +
+                      f"{selected_metric}: %{{y}}<br>" +
+                      "Activity: %{text}<br>" +
+                      "<extra></extra>"
+    ))
+
+    # Add bars for "Goal Not Reached"
     fig.add_trace(go.Bar(
         x=goal_not_reached['startTimeLocal'],
         y=goal_not_reached[selected_metric],
@@ -405,13 +542,22 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
                       "<extra></extra>"
     ))
 
-    # Add goal line
+    # Add 100% goal line
     fig.add_trace(go.Scatter(
         x=[start_date, end_date],
         y=[goal_value, goal_value],
         mode='lines',
-        name='Goal',
-        line=dict(color='blue', dash='dash')
+        name='Goal (100%)',
+        line=dict(color='#3b9c4e', dash='dash')
+    ))
+
+    # Add 75% goal line
+    fig.add_trace(go.Scatter(
+        x=[start_date, end_date],
+        y=[0.75 * goal_value, 0.75 * goal_value],
+        mode='lines',
+        name='Goal Almost Reached (75%)',
+        line=dict(color='#f5c43d', dash='dot')
     ))
 
     # Customize layout
@@ -420,7 +566,6 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
 
     fig.update_layout(
         title=f"{metric_label} Over Time",
-        xaxis_title='Date',
         yaxis_title=f"{metric_label} ({units})",
         xaxis=dict(
             tickformat="%b %d",
@@ -428,11 +573,17 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
             dtick="D1"
         ),
         barmode='group',
-        hovermode='closest'
+        hovermode='closest',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="center",
+            x=0.5
+        )
     )
 
     return fig
-
 
 def get_metric_units(metric):
     """Return the appropriate units for each metric"""

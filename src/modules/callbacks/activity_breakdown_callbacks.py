@@ -23,3 +23,12 @@ def register_activity_breakdown_callbacks(app):
 
         from modules.charts.activity_breakdown import create_activity_breakdown_chart
         return create_activity_breakdown_chart(filtered_df, selected_metric)
+    @app.callback(
+        Output('breakdown-metric-container', 'style'),
+        [Input('stored-data', 'data')]
+    )
+    def toggle_breakdown_metric_selector(stored_data):
+        if stored_data:
+            return {'marginBottom': '20px', 'marginTop': '10px', 'display': 'block'}
+        else:
+            return {'display': 'none'}
