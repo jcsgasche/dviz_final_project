@@ -34,7 +34,7 @@ floating_date_picker = dbc.Container([
     ], className="shadow-sm",
         style={
             'position': 'fixed',
-            'top': '80px',  # Below navbar
+            'top': '80px',
             'right': '20px',
             'zIndex': 1000,
             'width': 'auto',
@@ -49,7 +49,7 @@ navbar = dbc.Navbar(
         [
             html.H4(
                 "PFIFA! - Personal Functional Interactive Fitness Analysis",
-                className="mx-auto",  # Centers the text
+                className="mx-auto",
                 style={"color": "white", "margin": "0"}
             )
         ],
@@ -61,6 +61,11 @@ navbar = dbc.Navbar(
 
 app.layout = html.Div([
     navbar,
+    # Add persistent storage
+    dcc.Store(id='stored-data', storage_type='local'),
+    dcc.Store(id='strength-data-store', storage_type='local'),
+    dcc.Store(id='last-update-time', storage_type='local'),
+
     floating_date_picker,
     dbc.Container([
         dbc.Row([
@@ -102,7 +107,7 @@ register_data_callbacks(app)
 register_ui_callbacks(app)
 register_barchart_callbacks(app)
 register_activity_breakdown_callbacks(app)
-register_musclemap_callbacks(app)  # Added this line
+register_musclemap_callbacks(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

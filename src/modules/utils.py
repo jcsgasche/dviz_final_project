@@ -1,4 +1,3 @@
-# modules/utils.py
 from datetime import datetime, timedelta
 from dash import dcc, html
 
@@ -37,7 +36,13 @@ def create_data_layout():
         html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
         html.Div(id='garmin-status', style={'margin-top': '10px', 'color': 'green'}),
 
-        # Add download section
+        # Add last update time display
+        html.Div([
+            html.Hr(style={'margin': '20px 0'}),
+            html.P(id='last-update-display', style={'color': '#666', 'fontStyle': 'italic'}),
+        ]),
+
+        # Download section
         html.Div([
             html.Hr(style={'margin': '20px 0'}),
             html.H6("Download Data"),
@@ -53,9 +58,25 @@ def create_data_layout():
             html.Button("Download Data", id="btn-download", n_clicks=0,
                         style={'marginRight': '10px'}),
             dcc.Download(id="download-data")
-        ], id='download-section', style={'marginTop': '20px', 'display': 'none'})
-    ])
+        ], id='download-section', style={'marginTop': '20px', 'display': 'none'}),
 
+        # Add clear data button
+        html.Div([
+            html.Hr(style={'margin': '20px 0'}),
+            html.Button(
+                "Clear Stored Data",
+                id="clear-data-button",
+                n_clicks=0,
+                style={
+                    'backgroundColor': '#dc3545',
+                    'color': 'white',
+                    'border': 'none',
+                    'padding': '10px 20px',
+                    'borderRadius': '4px'
+                }
+            ),
+        ], id='clear-data-section', style={'marginTop': '20px', 'display': 'none'})
+    ])
 
 def create_upload_section():
     return [
@@ -72,10 +93,9 @@ def create_upload_section():
                 'textAlign': 'center',
                 'margin': '10px'
             },
+            contents=None,  # Initialize with no contents
             multiple=False
         ),
         html.Div(id='upload-status', style={'margin-top': '10px', 'color': 'green'})
     ]
 
-def create_refresh_section():
-    return html.Button('Refresh Data', id='refresh-button', n_clicks=0)

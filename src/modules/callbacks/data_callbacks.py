@@ -1,37 +1,130 @@
 # modules/callbacks/data_callbacks.py
+import dash
 from dash import Input, Output, State
 import pandas as pd
+import json
 import base64
 import io
-import json
-from garminconnect import Garmin
 from datetime import datetime
+from garminconnect import Garmin
 
 def register_data_callbacks(app):
+    # Separate callback for file upload
+    @app.callback(
+        [Output('stored-data', 'data', allow_duplicate=True),
+         Output('strength-data-store', 'data', allow_duplicate=True),
+         Output('garmin-status', 'children', allow_duplicate=True),
+         Output('last-update-time', 'data', allow_duplicate=True)],
+        Input('upload-data', 'contents'),
+        State('upload-data', 'filename'),
+        prevent_initial_call=True
+    )
+    def process_upload(contents, filename):
+        if contents is None:
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+        try:
+            content_type, content_string = contents.split(',')
+            decoded = base64.b64decode(content_string)
+
+            if 'json' in filename.lower():
+                data = json.loads(decoded)
+                all_activities = []
+                strength_activities = []
+
+                activities_list = data if isinstance(data, list) else [data]
+
+                for activity in activities_list:
+                    if 'summarizedExerciseSets' in activity:
+                        strength_activities.append(activity)
+                    all_activities.append(activity)
+
+                activities_df = pd.DataFrame(all_activities)
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                return (
+                    activities_df.to_dict('records'),
+                    json.dumps(strength_activities),
+                    f"File '{filename}' processed successfully.",
+                    current_time
+                )
+            else:
+                return None, None, "Please upload a JSON file.", None
+
+        except Exception as e:
+            print(f"Error processing file: {str(e)}")
+            return None, None, f"Error processing file: {str(e)}", None
+
+    # Main callback for Garmin fetch and clear
     @app.callback(
         [Output('stored-data', 'data'),
          Output('strength-data-store', 'data'),
-         Output('garmin-status', 'children')],
+         Output('garmin-status', 'children'),
+         Output('last-update-time', 'data'),
+         Output('upload-data', 'contents')],  # Add output to reset upload component
         [Input('fetch-button', 'n_clicks'),
-         Input('upload-data', 'contents')],
+         Input('upload-data', 'contents'),
+         Input('clear-data-button', 'n_clicks')],
         [State('garmin-email', 'value'),
          State('garmin-password', 'value'),
          State('data-source', 'value'),
          State('upload-data', 'filename')]
     )
-    def update_data(n_clicks, contents, username, password, data_source, filename):
-        if not any([n_clicks, contents]):
-            return None, None, ""
+    def update_data(n_clicks, contents, clear_clicks, username, password, data_source, filename):
+        ctx = dash.callback_context
+        if not ctx.triggered:
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
-        if data_source == 'garmin' and n_clicks:
+        trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+        # Handle clear data button
+        if trigger_id == 'clear-data-button':
+            return None, None, "Data cleared. You can now upload new data or fetch from Garmin.", None, None
+
+        # Handle file upload
+        if trigger_id == 'upload-data' and contents:
+            try:
+                content_type, content_string = contents.split(',')
+                decoded = base64.b64decode(content_string)
+
+                if 'json' in filename.lower():
+                    data = json.loads(decoded)
+                    all_activities = []
+                    strength_activities = []
+
+                    activities_list = data if isinstance(data, list) else [data]
+
+                    for activity in activities_list:
+                        if 'summarizedExerciseSets' in activity:
+                            strength_activities.append(activity)
+                        all_activities.append(activity)
+
+                    activities_df = pd.DataFrame(all_activities)
+                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                    return (
+                        activities_df.to_dict('records'),
+                        json.dumps(strength_activities),
+                        f"File '{filename}' processed successfully.",
+                        current_time,
+                        None  # Reset upload contents after successful processing
+                    )
+                else:
+                    return None, None, "Please upload a JSON file.", None, None
+
+            except Exception as e:
+                print(f"Error processing file: {str(e)}")
+                return None, None, f"Error processing file: {str(e)}", None, None
+
+        # Handle Garmin fetch
+        if trigger_id == 'fetch-button' and n_clicks:
             if not username or not password:
-                return None, None, "Please provide Garmin username and password."
+                return None, None, "Please provide Garmin username and password.", None, dash.no_update
 
             try:
                 api = Garmin(username, password)
                 api.login()
 
-                # Fetch all activities first
                 start = 0
                 limit = 100
                 all_activities = []
@@ -52,66 +145,46 @@ def register_data_callbacks(app):
                         break
                     start += limit
 
-                # Convert all activities to DataFrame for regular charts
                 activities_df = pd.DataFrame(all_activities)
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
                 return (
                     activities_df.to_dict('records'),
                     json.dumps(strength_activities),
-                    "Data fetched successfully from Garmin."
+                    "Data fetched successfully from Garmin.",
+                    current_time,
+                    dash.no_update
                 )
 
             except Exception as e:
-                return None, None, f"Error: {str(e)}"
+                return None, None, f"Error: {str(e)}", None, dash.no_update
 
-        elif data_source == 'upload' and contents:
-            content_type, content_string = contents.split(',')
-            decoded = base64.b64decode(content_string)
-
-            try:
-                if 'json' in filename.lower():
-                    # Parse the uploaded JSON
-                    data = json.loads(decoded)
-
-                    # Process all activities regardless of type
-                    all_activities = []
-                    strength_activities = []
-
-                    # Handle both single object and list formats
-                    activities_list = data if isinstance(data, list) else [data]
-
-                    for activity in activities_list:
-                        # Add to strength activities if it has exercise sets
-                        if 'summarizedExerciseSets' in activity:
-                            strength_activities.append(activity)
-                        # Add all activities to the main list
-                        all_activities.append(activity)
-
-                    # Convert to DataFrame for regular charts
-                    activities_df = pd.DataFrame(all_activities)
-
-                    return (
-                        activities_df.to_dict('records'),
-                        json.dumps(strength_activities),
-                        f"File '{filename}' processed successfully."
-                    )
-                else:
-                    return None, None, "Please upload a JSON file."
-
-            except Exception as e:
-                print(f"Error processing file: {str(e)}")  # For debugging
-                return None, None, f"Error processing file: {str(e)}"
-
-        return None, None, ""
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
     @app.callback(
-        Output("download-section", "style"),
-        [Input("stored-data", "data")]
+        [Output('garmin-login', 'style', allow_duplicate=True),
+         Output('file-upload', 'style', allow_duplicate=True)],
+        [Input('data-source', 'value')],
+        prevent_initial_call=True
     )
-    def show_download_section(data):
+    def toggle_input_visibility(data_source):
+        if data_source == 'garmin':
+            return {'display': 'block'}, {'display': 'none'}
+        return {'display': 'none'}, {'display': 'block'}
+
+    @app.callback(
+        [Output('download-section', 'style'),
+         Output('clear-data-section', 'style'),
+         Output('last-update-display', 'children')],
+        [Input('stored-data', 'data'),
+         Input('last-update-time', 'data')]
+    )
+    def update_ui_elements(data, last_update):
         if data:
-            return {'marginTop': '20px', 'display': 'block'}
-        return {'marginTop': '20px', 'display': 'none'}
+            display_style = {'marginTop': '20px', 'display': 'block'}
+            last_update_text = f"Last updated: {last_update}" if last_update else ""
+            return display_style, display_style, last_update_text
+        return {'display': 'none'}, {'display': 'none'}, ""
 
     @app.callback(
         Output("download-data", "data"),
@@ -125,7 +198,6 @@ def register_data_callbacks(app):
         if not n_clicks:
             return None
 
-        # Generate timestamp for filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if download_type == 'all' and all_data:
@@ -135,7 +207,7 @@ def register_data_callbacks(app):
             )
         elif download_type == 'strength' and strength_data:
             return dict(
-                content=strength_data,  # strength_data is already JSON string
+                content=strength_data,
                 filename=f"garmin_strength_activities_{timestamp}.json"
             )
 
