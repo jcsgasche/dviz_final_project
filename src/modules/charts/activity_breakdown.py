@@ -53,13 +53,15 @@ def create_activity_breakdown_layout():
     ])
 
 def create_empty_donut_chart(message):
-    """Create an empty donut chart with matching style to other empty charts"""
     fig = go.Figure(data=[go.Pie(
         labels=['No Data'],
         values=[1],
         hole=0.5,
         textinfo='none',
-        marker=dict(colors=['rgba(200, 200, 200, 0.2)']),  # Match the light grey from other charts
+        marker=dict(
+            colors=['rgba(200, 200, 200, 0.2)'],  # Match the light grey from other charts
+            line=dict(color='rgba(150, 150, 150, 0.5)', width=1)  # Add this line
+        ),
         hoverinfo='none',
         showlegend=False
     )])

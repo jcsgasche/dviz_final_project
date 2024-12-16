@@ -248,6 +248,7 @@ def create_empty_chart(message):
         x=background_x,
         y=background_y,
         marker_color='rgba(200, 200, 200, 0.2)',  # Very light grey
+        marker_line=dict(color='rgba(150, 150, 150, 0.5)', width=1),  # Add this line
         showlegend=False,
         hoverinfo='skip'
     ))
