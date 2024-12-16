@@ -65,8 +65,8 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
 
     # Prepare data for plotting
     metrics = []
-    percentages = []
-    colors = []
+    percentages_reached = []
+    percentages_not_reached = []
     hover_texts = []
 
     # Sort metrics by their labels
@@ -76,8 +76,14 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
         data = summary_data[metric]
         metric_label = METRIC_LABEL_MAP.get(metric, metric.replace('_', ' ').title())
         metrics.append(metric_label)
-        percentages.append(data['percentage'])
-        colors.append('green' if data['reached'] else 'red')
+
+        percentage = data['percentage']
+        if data['reached']:
+            percentages_reached.append(percentage)
+            percentages_not_reached.append(None)
+        else:
+            percentages_reached.append(None)
+            percentages_not_reached.append(percentage)
 
         # Create detailed hover text
         units = get_metric_units(metric)
@@ -88,13 +94,25 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
             f"Percentage: {data['percentage']:.1f}%"
         )
 
-    # Add bars for percentage values
+    # Add bars for goals reached
     fig.add_trace(go.Bar(
         x=metrics,
-        y=percentages,
-        marker_color=colors,
-        name='% of Goal',
-        text=[f"{p:.1f}%" for p in percentages],
+        y=percentages_reached,
+        marker_color='green',
+        name='Goal Reached',
+        text=[f"{p:.1f}%" if p is not None else "" for p in percentages_reached],
+        textposition='auto',
+        hovertext=hover_texts,
+        hoverinfo='text'
+    ))
+
+    # Add bars for goals not reached
+    fig.add_trace(go.Bar(
+        x=metrics,
+        y=percentages_not_reached,
+        marker_color='red',
+        name='Goal Not Reached',
+        text=[f"{p:.1f}%" if p is not None else "" for p in percentages_not_reached],
         textposition='auto',
         hovertext=hover_texts,
         hoverinfo='text'
@@ -124,12 +142,14 @@ def create_summary_chart(df, start_date, end_date, stored_goals):
             tickvals=list(range(len(metrics)))
         ),
         yaxis=dict(
-            range=[0, max(max(percentages) * 1.1, 120)],  # Make sure 100% line is visible
+            range=[0, max(max([p for p in percentages_reached if p is not None] +
+                              [p for p in percentages_not_reached if p is not None]) * 1.1, 120)],  # Make sure 100% line is visible
         ),
         showlegend=True,
         height=600,
         margin=dict(b=150),  # Add bottom margin for rotated labels
-        hovermode='closest'
+        hovermode='closest',
+        barmode='overlay'  # This ensures bars don't stack
     )
 
     return fig
