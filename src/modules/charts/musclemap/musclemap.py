@@ -132,7 +132,7 @@ def create_spider_chart(processed_data, start_date, end_date):
                 tickfont=dict(size=12)  # Adjust font size as needed
             )
         ),
-        showlegend=False,
+        showlegend=True,
         height=600
     )
 

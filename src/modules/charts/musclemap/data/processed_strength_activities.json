@@ -1,11 +1,11 @@
 [
     {
-        "date": "2024-09-25",
+        "date": "2024-08-19",
         "exercises": [
             {
                 "exercise_name": "BENCH_PRESS",
-                "repetitions": 63,
-                "sets": 5,
+                "repetitions": 53,
+                "sets": 6,
                 "primary_muscles": [
                     "FrontChestRight",
                     "FrontChestLeft"
@@ -18,22 +18,64 @@
                 ]
             },
             {
-                "exercise_name": "LATERAL_RAISE",
-                "repetitions": 4,
-                "sets": 1,
+                "exercise_name": "SIT_UP",
+                "repetitions": 13,
+                "sets": 2,
                 "primary_muscles": [
-                    "FrontDeltsRight",
-                    "FrontDeltsLeft"
+                    "FrontAbsRight",
+                    "FrontAbsLeft"
                 ],
                 "secondary_muscles": [
-                    "BackDeltsRight",
-                    "BackDeltsLeft"
+                    "FrontObliquesRight",
+                    "FrontObliquesLeft"
+                ]
+            },
+            {
+                "exercise_name": "ROW",
+                "repetitions": 46,
+                "sets": 5,
+                "primary_muscles": [
+                    "BackLatsRight",
+                    "BackLatsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackBicepsRight",
+                    "BackBicepsLeft"
+                ]
+            },
+            {
+                "exercise_name": "UNKNOWN",
+                "repetitions": 5,
+                "sets": 1,
+                "primary_muscles": [
+                    "Undefined"
+                ],
+                "secondary_muscles": [
+                    "Undefined"
+                ]
+            }
+        ]
+    },
+    {
+        "date": "2024-08-18",
+        "exercises": [
+            {
+                "exercise_name": "PUSH_UP",
+                "repetitions": 51,
+                "sets": 3,
+                "primary_muscles": [
+                    "FrontChestRight",
+                    "FrontChestLeft"
+                ],
+                "secondary_muscles": [
+                    "BackTricepsRight",
+                    "BackTricepsLeft"
                 ]
             },
             {
                 "exercise_name": "PULL_UP",
-                "repetitions": 23,
-                "sets": 2,
+                "repetitions": 29,
+                "sets": 4,
                 "primary_muscles": [
                     "BackLatsRight",
                     "BackLatsLeft"
@@ -45,7 +87,103 @@
             },
             {
                 "exercise_name": "UNKNOWN",
-                "repetitions": 15,
+                "repetitions": 11,
+                "sets": 2,
+                "primary_muscles": [
+                    "Undefined"
+                ],
+                "secondary_muscles": [
+                    "Undefined"
+                ]
+            }
+        ]
+    },
+    {
+        "date": "2024-08-16",
+        "exercises": [
+            {
+                "exercise_name": "BENCH_PRESS",
+                "repetitions": 49,
+                "sets": 4,
+                "primary_muscles": [
+                    "FrontChestRight",
+                    "FrontChestLeft"
+                ],
+                "secondary_muscles": [
+                    "FrontDeltsRight",
+                    "FrontDeltsLeft",
+                    "BackTricepsRight",
+                    "BackTricepsLeft"
+                ]
+            },
+            {
+                "exercise_name": "SIT_UP",
+                "repetitions": 41,
+                "sets": 2,
+                "primary_muscles": [
+                    "FrontAbsRight",
+                    "FrontAbsLeft"
+                ],
+                "secondary_muscles": [
+                    "FrontObliquesRight",
+                    "FrontObliquesLeft"
+                ]
+            },
+            {
+                "exercise_name": "PUSH_UP",
+                "repetitions": 7,
+                "sets": 1,
+                "primary_muscles": [
+                    "FrontChestRight",
+                    "FrontChestLeft"
+                ],
+                "secondary_muscles": [
+                    "BackTricepsRight",
+                    "BackTricepsLeft"
+                ]
+            },
+            {
+                "exercise_name": "CURL",
+                "repetitions": 26,
+                "sets": 2,
+                "primary_muscles": [
+                    "FrontBicepsRight",
+                    "FrontBicepsLeft"
+                ],
+                "secondary_muscles": [
+                    "FrontForearmsRight",
+                    "FrontForearmsLeft"
+                ]
+            },
+            {
+                "exercise_name": "LATERAL_RAISE",
+                "repetitions": 45,
+                "sets": 5,
+                "primary_muscles": [
+                    "FrontDeltsRight",
+                    "FrontDeltsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackDeltsRight",
+                    "BackDeltsLeft"
+                ]
+            },
+            {
+                "exercise_name": "PULL_UP",
+                "repetitions": 33,
+                "sets": 4,
+                "primary_muscles": [
+                    "BackLatsRight",
+                    "BackLatsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackTrapsRight",
+                    "BackTrapsLeft"
+                ]
+            },
+            {
+                "exercise_name": "UNKNOWN",
+                "repetitions": 5,
                 "sets": 1,
                 "primary_muscles": [
                     "Undefined"
@@ -69,7 +207,160 @@
             },
             {
                 "exercise_name": "SQUAT",
-                "repetitions": 64,
+                "repetitions": 6,
+                "sets": 1,
+                "primary_muscles": [
+                    "FrontQuadsRight",
+                    "FrontQuadsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackGlutesRight",
+                    "BackGlutesLeft",
+                    "BackHamstringsRight",
+                    "BackHamstringsLeft"
+                ]
+            }
+        ]
+    },
+    {
+        "date": "2024-08-12",
+        "exercises": [
+            {
+                "exercise_name": "BENCH_PRESS",
+                "repetitions": 11,
+                "sets": 2,
+                "primary_muscles": [
+                    "FrontChestRight",
+                    "FrontChestLeft"
+                ],
+                "secondary_muscles": [
+                    "FrontDeltsRight",
+                    "FrontDeltsLeft",
+                    "BackTricepsRight",
+                    "BackTricepsLeft"
+                ]
+            },
+            {
+                "exercise_name": "PUSH_UP",
+                "repetitions": 28,
+                "sets": 3,
+                "primary_muscles": [
+                    "FrontChestRight",
+                    "FrontChestLeft"
+                ],
+                "secondary_muscles": [
+                    "BackTricepsRight",
+                    "BackTricepsLeft"
+                ]
+            },
+            {
+                "exercise_name": "LATERAL_RAISE",
+                "repetitions": 16,
+                "sets": 1,
+                "primary_muscles": [
+                    "FrontDeltsRight",
+                    "FrontDeltsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackDeltsRight",
+                    "BackDeltsLeft"
+                ]
+            },
+            {
+                "exercise_name": "UNKNOWN",
+                "repetitions": 3,
+                "sets": 1,
+                "primary_muscles": [
+                    "Undefined"
+                ],
+                "secondary_muscles": [
+                    "Undefined"
+                ]
+            },
+            {
+                "exercise_name": "ROW",
+                "repetitions": 19,
+                "sets": 2,
+                "primary_muscles": [
+                    "BackLatsRight",
+                    "BackLatsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackBicepsRight",
+                    "BackBicepsLeft"
+                ]
+            }
+        ]
+    },
+    {
+        "date": "2024-08-07",
+        "exercises": [
+            {
+                "exercise_name": "BENCH_PRESS",
+                "repetitions": 56,
+                "sets": 6,
+                "primary_muscles": [
+                    "FrontChestRight",
+                    "FrontChestLeft"
+                ],
+                "secondary_muscles": [
+                    "FrontDeltsRight",
+                    "FrontDeltsLeft",
+                    "BackTricepsRight",
+                    "BackTricepsLeft"
+                ]
+            },
+            {
+                "exercise_name": "TRICEPS_EXTENSION",
+                "repetitions": 7,
+                "sets": 1,
+                "primary_muscles": [
+                    "Undefined"
+                ],
+                "secondary_muscles": [
+                    "Undefined"
+                ]
+            },
+            {
+                "exercise_name": "PULL_UP",
+                "repetitions": 16,
+                "sets": 2,
+                "primary_muscles": [
+                    "BackLatsRight",
+                    "BackLatsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackTrapsRight",
+                    "BackTrapsLeft"
+                ]
+            },
+            {
+                "exercise_name": "UNKNOWN",
+                "repetitions": 30,
+                "sets": 4,
+                "primary_muscles": [
+                    "Undefined"
+                ],
+                "secondary_muscles": [
+                    "Undefined"
+                ]
+            },
+            {
+                "exercise_name": "ROW",
+                "repetitions": 11,
+                "sets": 1,
+                "primary_muscles": [
+                    "BackLatsRight",
+                    "BackLatsLeft"
+                ],
+                "secondary_muscles": [
+                    "BackBicepsRight",
+                    "BackBicepsLeft"
+                ]
+            },
+            {
+                "exercise_name": "SQUAT",
+                "repetitions": 48,
                 "sets": 5,
                 "primary_muscles": [
                     "FrontQuadsRight",

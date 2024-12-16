@@ -14,8 +14,8 @@ from modules.callbacks.musclemap_callbacks import register_musclemap_callbacks
 THEME = dbc.themes.LUX
 
 app = Dash(__name__,
-           external_stylesheets=[THEME],
-           suppress_callback_exceptions=True)
+        external_stylesheets=[THEME],
+        suppress_callback_exceptions=True)
 
 first_day_last_month, last_day_last_month = calculate_date_range()
 
