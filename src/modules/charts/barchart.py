@@ -62,7 +62,8 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
                 'percentage': percentage,
                 'mean': mean_value,
                 'goal': goal_value,
-                'reached': percentage >= 100
+                'reached': percentage >= 100,
+                'almost_reached': 75 <= percentage < 100
             }
 
     # Create the summary bar chart
@@ -71,11 +72,13 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
     # Prepare data for plotting
     metrics = []
     percentages_reached = []
+    percentages_almost_reached = []
     percentages_not_reached = []
     hover_texts = []
 
     # Sort metrics by their labels
     sorted_metrics = sorted(summary_data.keys(), key=lambda x: METRIC_LABEL_MAP.get(x, x))
+    valid_values = [p for p in (percentages_reached + percentages_almost_reached + percentages_not_reached) if p is not None]
 
     for metric in sorted_metrics:
         data = summary_data[metric]
@@ -85,9 +88,15 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         percentage = data['percentage']
         if data['reached']:
             percentages_reached.append(percentage)
+            percentages_almost_reached.append(None)
+            percentages_not_reached.append(None)
+        elif data['almost_reached']:
+            percentages_reached.append(None)
+            percentages_almost_reached.append(percentage)
             percentages_not_reached.append(None)
         else:
             percentages_reached.append(None)
+            percentages_almost_reached.append(None)
             percentages_not_reached.append(percentage)
 
         # Create detailed hover text
@@ -111,6 +120,18 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         hoverinfo='text'
     ))
 
+    # Add bars for goals almost reached
+    fig.add_trace(go.Bar(
+        x=metrics,
+        y=percentages_almost_reached,
+        marker_color='orange',
+        name='Goal Almost Reached',
+        text=[f"{p:.1f}%" if p is not None else "" for p in percentages_almost_reached],
+        textposition='auto',
+        hovertext=hover_texts,
+        hoverinfo='text'
+    ))
+
     # Add bars for goals not reached
     fig.add_trace(go.Bar(
         x=metrics,
@@ -123,7 +144,7 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         hoverinfo='text'
     ))
 
-    # Add 100% goal line using paper coordinates
+    # Add 100% goal line
     fig.add_shape(
         type="line",
         x0=0,
@@ -139,7 +160,23 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         yref="y"
     )
 
-    # Add the goal line to legend
+    # Add 75% goal line
+    fig.add_shape(
+        type="line",
+        x0=0,
+        x1=1,
+        y0=75,
+        y1=75,
+        line=dict(
+            color="orange",
+            width=2,
+            dash="dot",
+        ),
+        xref="paper",
+        yref="y"
+    )
+
+    # Add the goal lines to legend
     fig.add_trace(go.Scatter(
         x=[None],
         y=[None],
@@ -148,6 +185,18 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         line=dict(
             color='blue',
             dash='dash'
+        ),
+        showlegend=True
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=[None],
+        y=[None],
+        mode='lines',
+        name='Goal Almost Reached (75%)',
+        line=dict(
+            color='orange',
+            dash='dot'
         ),
         showlegend=True
     ))
@@ -164,14 +213,13 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
             tickvals=list(range(len(metrics)))
         ),
         yaxis=dict(
-            range=[0, max(max([p for p in percentages_reached if p is not None] +
-                              [p for p in percentages_not_reached if p is not None]) * 1.1, 120)],  # Make sure 100% line is visible
+            range=[0, max(max(valid_values) * 1.1, 120) if valid_values else 120],  # Ensure visibility
         ),
         showlegend=True,
         height=600,
         margin=dict(b=150),  # Add bottom margin for rotated labels
         hovermode='closest',
-        barmode='overlay'  # This ensures bars don't stack
+        barmode='overlay'  # Ensures bars don't stack
     )
 
     return fig
@@ -428,7 +476,6 @@ def create_barchart_layout(first_day_last_month, last_day_last_month):
     ])
 
 def create_activity_chart(df, selected_metric, start_date, end_date, goal_value):
-    # If df is None (initial state, no data loaded)
     if df is None:
         return create_empty_chart("Waiting for you to add<br>your personal fitness data")
 
@@ -441,23 +488,22 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
     mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
     filtered_df = df.loc[mask]
 
-    # Check if there's any data in the filtered period
     if len(filtered_df) == 0:
         return create_empty_chart("No data available<br>in this period of time")
 
-    # For metrics that might not exist in all activities
     if selected_metric not in filtered_df.columns:
         filtered_df[selected_metric] = 0
 
     goal_reached = filtered_df[filtered_df[selected_metric] >= goal_value]
-    goal_not_reached = filtered_df[filtered_df[selected_metric] < goal_value]
+    goal_almost_reached = filtered_df[(filtered_df[selected_metric] >= 0.75 * goal_value) &
+                                      (filtered_df[selected_metric] < goal_value)]
+    goal_not_reached = filtered_df[filtered_df[selected_metric] < 0.75 * goal_value]
 
-    # Create activity type markers
     activity_types = filtered_df['activityType'].apply(lambda x: x['typeKey'] if isinstance(x, dict) else 'unknown')
 
     fig = go.Figure()
 
-    # Add bars for goal reached activities
+    # Add bars for "Goal Reached"
     fig.add_trace(go.Bar(
         x=goal_reached['startTimeLocal'],
         y=goal_reached[selected_metric],
@@ -470,7 +516,20 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
                       "<extra></extra>"
     ))
 
-    # Add bars for activities not reaching goal
+    # Add bars for "Goal Almost Reached"
+    fig.add_trace(go.Bar(
+        x=goal_almost_reached['startTimeLocal'],
+        y=goal_almost_reached[selected_metric],
+        marker_color='orange',
+        name='Goal Almost Reached',
+        text=activity_types[goal_almost_reached.index],
+        hovertemplate="Date: %{x}<br>" +
+                      f"{selected_metric}: %{{y}}<br>" +
+                      "Activity: %{text}<br>" +
+                      "<extra></extra>"
+    ))
+
+    # Add bars for "Goal Not Reached"
     fig.add_trace(go.Bar(
         x=goal_not_reached['startTimeLocal'],
         y=goal_not_reached[selected_metric],
@@ -483,13 +542,22 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
                       "<extra></extra>"
     ))
 
-    # Add goal line
+    # Add 100% goal line
     fig.add_trace(go.Scatter(
         x=[start_date, end_date],
         y=[goal_value, goal_value],
         mode='lines',
-        name='Goal',
+        name='Goal (100%)',
         line=dict(color='blue', dash='dash')
+    ))
+
+    # Add 75% goal line
+    fig.add_trace(go.Scatter(
+        x=[start_date, end_date],
+        y=[0.75 * goal_value, 0.75 * goal_value],
+        mode='lines',
+        name='Goal Almost Reached (75%)',
+        line=dict(color='orange', dash='dot')
     ))
 
     # Customize layout
@@ -506,11 +574,17 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value)
             dtick="D1"
         ),
         barmode='group',
-        hovermode='closest'
+        hovermode='closest',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="center",
+            x=0.5
+        )
     )
 
     return fig
-
 
 def get_metric_units(metric):
     """Return the appropriate units for each metric"""
