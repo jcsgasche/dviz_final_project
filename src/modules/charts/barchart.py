@@ -123,16 +123,33 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         hoverinfo='text'
     ))
 
-    # Add 100% goal line
+    # Add 100% goal line using paper coordinates
+    fig.add_shape(
+        type="line",
+        x0=0,
+        x1=1,
+        y0=100,
+        y1=100,
+        line=dict(
+            color="blue",
+            width=2,
+            dash="dash",
+        ),
+        xref="paper",
+        yref="y"
+    )
+
+    # Add the goal line to legend
     fig.add_trace(go.Scatter(
-        x=metrics,
-        y=[100] * len(metrics),
+        x=[None],
+        y=[None],
         mode='lines',
         name='Goal (100%)',
         line=dict(
             color='blue',
             dash='dash'
-        )
+        ),
+        showlegend=True
     ))
 
     # Customize layout
