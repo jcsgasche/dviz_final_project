@@ -286,7 +286,7 @@ def create_data_loaded_div(first_day_last_month, last_day_last_month):
         html.Div([
             # Toggle button
             html.Button(
-                "Toggle Summary View",
+                "Toggle View",
                 id='toggle-summary-view',
                 n_clicks=0,
                 style={'marginBottom': '10px'}
