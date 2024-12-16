@@ -1,6 +1,6 @@
 # modules/callbacks/data_callbacks.py
 import dash
-from dash import Input, Output, State
+from dash import Input, Output, State, html
 import pandas as pd
 import json
 import base64
@@ -15,7 +15,6 @@ def register_data_callbacks(app):
          Output('clear-data-section', 'style', allow_duplicate=True),
          Output('last-update-display', 'children', allow_duplicate=True),
          Output('data-status-container', 'children'),
-         Output('garmin-status', 'children'),
          Output('garmin-login', 'style', allow_duplicate=True),
          Output('file-upload', 'style', allow_duplicate=True)],
         [Input('stored-data', 'modified_timestamp'),
@@ -32,17 +31,38 @@ def register_data_callbacks(app):
         garmin_style = {'display': 'block'} if data_source == 'garmin' else {'display': 'none'}
         file_style = {'display': 'block'} if data_source != 'garmin' else {'display': 'none'}
 
-        # Status messages
+        # Common message style
+        message_style = {
+            'fontWeight': '500',
+            'padding': '10px',
+            'borderRadius': '4px',
+            'textAlign': 'center',
+            'width': '100%'
+        }
+
+        # Status messages with consistent styling
         last_update_text = f"Last updated: {last_update}" if last_update else ""
-        status_message = "Data loaded successfully." if stored_data else ""
-        garmin_status = "Ready to fetch data" if not stored_data else ""
+
+        if stored_data:
+            status_message = html.Div("Data loaded successfully.",
+                                      style={
+                                          **message_style,
+                                          'color': '#28a745',  # Bootstrap success green
+                                          'backgroundColor': '#f8f9f8'
+                                      })
+        else:
+            status_message = html.Div("Ready to fetch data",
+                                      style={
+                                          **message_style,
+                                          'color': '#6c757d',  # Bootstrap secondary gray
+                                          'backgroundColor': '#f8f9fa'
+                                      })
 
         return (
             display_style,           # download section style
             display_style,           # clear data section style
             last_update_text,        # last update display
             status_message,          # data status container
-            garmin_status,          # garmin status
             garmin_style,           # garmin login style
             file_style              # file upload style
         )
@@ -60,7 +80,6 @@ def register_data_callbacks(app):
          State('data-source', 'value'),
          State('upload-data', 'filename')]
     )
-
     def update_data(n_clicks, upload_contents, clear_clicks,
                     username, password, data_source, filename):
         ctx = dash.callback_context
@@ -101,16 +120,16 @@ def register_data_callbacks(app):
                         None  # Reset upload contents
                     )
                 else:
-                    return (None, None, None, None)
+                    return None, None, None, None
 
             except Exception as e:
                 print(f"Error processing file: {str(e)}")
-                return (None, None, None, None)
+                return None, None, None, None
 
         # Handle Garmin fetch
         if trigger_id == 'fetch-button' and n_clicks:
             if not username or not password:
-                return (None, None, None, dash.no_update)
+                return None, None, None, dash.no_update
 
             try:
                 api = Garmin(username, password)
@@ -147,7 +166,7 @@ def register_data_callbacks(app):
                 )
 
             except Exception as e:
-                return (None, None, None, dash.no_update)
+                return None, None, None, dash.no_update
 
         raise dash.exceptions.PreventUpdate
 

@@ -23,26 +23,45 @@ def create_data_layout():
             )
         ], style={'margin-bottom': '20px'}),
 
+        # Data input section
         html.Div([
-            html.Label("Garmin Email:", style={'marginRight': '10px', 'marginBottom': '10px'}),
-            dcc.Input(id='garmin-email', type='email', placeholder='Enter your Garmin email', style={'width': '300px'}),
-            html.Br(),
-            html.Label("Garmin Password:", style={'marginRight': '10px'}),
-            dcc.Input(id='garmin-password', type='password', placeholder='Enter your Garmin password', style={'width': '300px'}),
-            html.Br(),
-            html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'})
-        ], id='garmin-login', style={'display': 'block'}),
+            # Garmin login section
+            html.Div([
+                html.Label("Garmin Email:", style={'marginRight': '10px', 'marginBottom': '10px'}),
+                dcc.Input(id='garmin-email', type='email', placeholder='Enter your Garmin email', style={'width': '300px'}),
+                html.Br(),
+                html.Label("Garmin Password:", style={'marginRight': '10px'}),
+                dcc.Input(id='garmin-password', type='password', placeholder='Enter your Garmin password', style={'width': '300px'}),
+                html.Br(),
+                html.Button('Fetch Data', id='fetch-button', n_clicks=0, style={'margin-top': '10px'})
+            ], id='garmin-login', style={'display': 'block'}),
 
-        html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
-        html.Div(id='garmin-status', style={'margin-top': '10px', 'color': 'green'}),
+            # File upload section
+            html.Div(create_upload_section(), id='file-upload', style={'display': 'none'}),
 
-        # Add last update time display
+            # Status message container - single container for both messages
+            html.Div(style={
+                'marginTop': '20px',
+                'padding': '10px 0',
+                'borderTop': '1px solid #eee',
+                'borderBottom': '1px solid #eee',
+                'minHeight': '50px',  # Ensure consistent height
+                'display': 'flex',
+                'alignItems': 'center'  # Vertical centering
+            }, children=[
+                # Remove the separate garmin-status div and use data-status-container only
+                html.Div(id='data-status-container')
+            ]),
+
+        ], style={'marginBottom': '20px'}),
+
+        # Last update time display
         html.Div([
             html.Hr(style={'margin': '20px 0'}),
             html.P(id='last-update-display', style={'color': '#666', 'fontStyle': 'italic'}),
         ]),
 
-        # Download section
+        # Rest of the layout remains the same...
         html.Div([
             html.Hr(style={'margin': '20px 0'}),
             html.H6("Download Data"),
@@ -60,7 +79,6 @@ def create_data_layout():
             dcc.Download(id="download-data")
         ], id='download-section', style={'marginTop': '20px', 'display': 'none'}),
 
-        # Add clear data button
         html.Div([
             html.Hr(style={'margin': '20px 0'}),
             html.Button(
@@ -98,4 +116,3 @@ def create_upload_section():
         ),
         html.Div(id='upload-status', style={'margin-top': '10px', 'color': 'green'})
     ]
-
