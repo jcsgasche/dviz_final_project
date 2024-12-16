@@ -27,7 +27,6 @@ METRIC_CONFIGS = {
     'elevationGain': {'label': 'Elevation Gain', 'unit': 'm', 'format': '.1f'}
 }
 
-# Dropdown options
 BREAKDOWN_METRICS = [
     {'label': config['label'], 'value': metric}
     for metric, config in METRIC_CONFIGS.items()
@@ -59,11 +58,10 @@ def create_empty_donut_chart(message):
         values=[1],
         hole=0.5,
         textinfo='none',
-        marker=dict(colors=['#E0E0E0']),  # Light gray color
+        marker=dict(colors=['#E0E0E0']),
         hoverinfo='none'
     )])
 
-    # Add message text in the center
     fig.add_annotation(
         text=message,
         x=0.5,
@@ -73,7 +71,6 @@ def create_empty_donut_chart(message):
         align='center',
     )
 
-    # Update layout for empty state
     fig.update_layout(
         showlegend=False,
         height=600,
@@ -92,26 +89,20 @@ def create_activity_breakdown_chart(df, selected_metric):
     if df is None:
         return create_empty_donut_chart("Waiting for you to add<br>your personal fitness data")
 
-    # Create an explicit copy
     df = df.copy()
-
-    # Now these operations will be safe
     df['activity_type'] = df['activityType'].apply(lambda x: x['typeKey'] if isinstance(x, dict) else 'unknown')
     df['activity_type_label'] = df['activity_type'].map(ACTIVITY_TYPE_LABELS)
 
     metric_config = METRIC_CONFIGS[selected_metric]
 
-    # Check if there's any data in the filtered period
     if len(df) == 0:
         return create_empty_donut_chart("No data available<br>in this period of time")
 
     if selected_metric == 'count':
-        # For count, get frequency of each activity type
         breakdown = df['activity_type_label'].value_counts()
         total = len(df)
         hover_template = "Activity: %{label}<br>Count: %{value}<br>Percentage: %{percent}"
     else:
-        # For other metrics, handle conversions and sums
         if selected_metric == 'distance':
             df[selected_metric] = df[selected_metric] / 1000  # Convert to km
         elif selected_metric == 'duration':
@@ -123,11 +114,13 @@ def create_activity_breakdown_chart(df, selected_metric):
                           f"{metric_config['label']}: %{{value:{metric_config['format']}}} {metric_config['unit']}"
                           f"<br>Percentage: %{{percent}}")
 
+    # Remove activities with zero values
+    breakdown = breakdown[breakdown > 0]
+
     # Create color scale for consistent colors
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
               '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 
-    # Create the donut chart
     fig = go.Figure(data=[go.Pie(
         labels=breakdown.index,
         values=breakdown.values,
@@ -140,14 +133,12 @@ def create_activity_breakdown_chart(df, selected_metric):
         textfont=dict(size=12)
     )])
 
-    # Format the title with total
     if selected_metric == 'count':
         title_text = f"Activity Distribution (Total: {total:,} activities)"
     else:
         title_text = (f"Activity Distribution by {metric_config['label']} "
                       f"(Total: {total:{metric_config['format']}} {metric_config['unit']})")
 
-    # Update layout
     fig.update_layout(
         title=dict(
             text=title_text,
@@ -169,12 +160,5 @@ def create_activity_breakdown_chart(df, selected_metric):
         paper_bgcolor='white',
         font=dict(family="Arial, sans-serif")
     )
-
-    # Add annotations for small segments
-    min_percent_for_label = 3  # Only show labels for segments > 3%
-    for i in range(len(breakdown)):
-        percent = (breakdown.values[i] / total) * 100
-        if percent < min_percent_for_label:
-            fig.data[0].textinfo = 'label'
 
     return fig
