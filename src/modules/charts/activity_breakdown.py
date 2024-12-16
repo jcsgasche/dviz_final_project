@@ -70,7 +70,7 @@ def create_empty_donut_chart(message):
         y=0.5,
         showarrow=False,
         font=dict(size=14),
-        align='center'
+        align='center',
     )
 
     # Update layout for empty state
@@ -80,7 +80,10 @@ def create_empty_donut_chart(message):
         plot_bgcolor='white',
         paper_bgcolor='white',
         margin=dict(t=80, l=20, r=20, b=20),
-        font=dict(family="Arial, sans-serif")
+        font=dict(family="Arial, sans-serif"),
+        annotations=[{
+            'font': {'size': 18}
+        }]
     )
 
     return fig

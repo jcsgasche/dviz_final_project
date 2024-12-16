@@ -251,7 +251,7 @@ def create_empty_chart(message):
             'xref': 'paper',
             'yref': 'paper',
             'showarrow': False,
-            'font': {'size': 14},
+            'font': {'size': 18},
             'xanchor': 'center',
             'yanchor': 'middle',
             'align': 'center',
