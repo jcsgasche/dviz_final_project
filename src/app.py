@@ -27,7 +27,7 @@ with open(logo_path, 'rb') as f:
 
 logo_image = html.Img(
     src=f'data:image/png;base64,{encoded_logo}',
-    style={'height': '90px', 'marginLeft': '20px'}  # Adjust as needed
+    style={'height': '90px', 'marginLeft': '40px'}  # Adjust as needed
 )
 
 # Data stores container
@@ -68,7 +68,7 @@ navbar = dbc.Navbar(
             html.H4(
                 "PFIFA! - Personal Functional Interactive Fitness Analysis",
                 className="mx-auto",
-                style={"color": "white", "margin": "0",}
+                style={"color": "white", "margin": "0", "fontSize": "30px"}
             )
         ],
         fluid=True
