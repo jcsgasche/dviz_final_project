@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg') 
+matplotlib.use('Agg')
 
 import os
 import sys
@@ -52,19 +52,63 @@ def load_and_parse_muscle_coordinates(filename):
                 parsed_data[view][muscle] = []
                 for path_data in paths:
                     if "path" not in path_data or not path_data["path"]:
-                        # If there's no path or it's empty, skip
                         continue
                     parsed_coords = parse_svg_path(path_data["path"])
                     transformed_coords = apply_transformation(
                         parsed_coords, path_data.get("transform", {})
                     )
-                    # Only append if we have at least 3 points for a polygon
                     if len(transformed_coords) >= 3:
                         parsed_data[view][muscle].append({
                             "coords": transformed_coords,
                             "style": path_data["style"]
                         })
     return parsed_data.get("Front", {})
+
+def add_legend(fig, ax):
+    """Add the legend to the muscle map"""
+    legend_height = 0.05
+    legend_ax = fig.add_axes([0.85, 0.7, 0.1, legend_height])
+    legend_ax.set_xlim(0, 1)
+    legend_ax.set_ylim(0, 2)
+    legend_ax.set_yticks([])
+    legend_ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
+    legend_ax.set_xticklabels(["0", "0.25", "0.5", "0.75", "1.0"])
+
+    # Create background rectangle
+    legend_bg = plt.Rectangle(
+        (0, 0), 1, 1,
+        transform=legend_ax.transAxes,
+        facecolor=(0.9, 0.9, 0.9),
+        zorder=0
+    )
+    legend_ax.add_patch(legend_bg)
+
+    # Draw border
+    legend_ax.spines["left"].set_visible(True)
+    legend_ax.spines["right"].set_visible(True)
+    legend_ax.spines["top"].set_visible(True)
+    legend_ax.spines["bottom"].set_visible(True)
+    legend_ax.set_facecolor('black')
+
+    # Primary line
+    legend_ax.text(-0.15, 1.3, "Primary Trained Muscles", ha='right', va='center', fontsize=12, color='black')
+    for i in range(5):
+        alpha_val = 1.0 - 0.25 * i
+        xstart = i * 0.2
+        rect = plt.Rectangle((xstart, 1.1), 0.2, 0.4, facecolor=(1, 0, 0, alpha_val))
+        legend_ax.add_patch(rect)
+
+    # Secondary line
+    legend_ax.text(-0.15, 0.1, "Secondary Trained Muscles", ha='right', va='center', fontsize=12, color='black')
+    for i in range(5):
+        alpha_val = 1.0 - 0.25 * i
+        xstart = i * 0.2
+        rect = plt.Rectangle((xstart, 0.1), 0.2, 0.4, facecolor=(1, 1, 0, alpha_val))
+        legend_ax.add_patch(rect)
+
+    # Note below lines
+    legend_ax.text(0.5, -1.2, "Muscles that did not get stimulated remain grey.",
+                   ha='center', va='top', fontsize=10, color='black')
 
 def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Waiting for you to add\nyour personal fitness data"):
     """Create an empty muscle map with grey muscles and a message"""
@@ -86,34 +130,34 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
                 continue
 
             polygon = Polygon(coords, closed=True, facecolor="lightgrey",
-                            edgecolor="black", linewidth=0.5)
+                              edgecolor="black", linewidth=0.5)
             ax.add_patch(polygon)
 
     # Add centered message
     center_x = (xlim[0] + xlim[1]) / 2
     center_y = (ylim[0] + ylim[1]) / 2
 
-    # Match Plotly's style more closely
     bg_box = dict(
-        boxstyle='square,pad=0.6',  # Changed from round to square with less padding
+        boxstyle='square,pad=0.6',
         facecolor='white',
         alpha=0.9,
         edgecolor='none'
     )
 
-    # Replace HTML <br> with actual newlines for matplotlib
     message = message.replace("<br>", "\n")
 
     plt.text(center_x, center_y, message,
-            horizontalalignment='center',
-            verticalalignment='center',
-            fontsize=18,
-            color='#000000',
-            bbox=bg_box,
-            linespacing=1.2)  # Adjusted line spacing to match Plotly
+             horizontalalignment='center',
+             verticalalignment='center',
+             fontsize=18,
+             color='#000000',
+             bbox=bg_box,
+             linespacing=1.2)
+
+    # Add the legend
+    add_legend(fig, ax)
 
     buf = io.BytesIO()
-    # Increased DPI for sharper text
     plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
     plt.close(fig)
     buf.seek(0)
@@ -124,19 +168,9 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
     """Plot the muscle map with activity data"""
     if not processed_strength_activities:
         return create_empty_muscle_map(muscle_coordinates, zoom_out_factor,
-                                    message="No data available\nin this period of time")
+                                       message="No data available\nin this period of time")
 
-    # Rest of the function remains the same...
-
-    # Rest of the function remains the same...
-    if not processed_strength_activities:
-        return create_empty_muscle_map(muscle_coordinates, zoom_out_factor)
-
-    # Rest of the original function remains the same...
-
-    # Rest of the original function remains the same...
-
-    # Rest of the original function remains the same...    # Calculate repetitions
+    # Calculate repetitions
     primary_reps = {}
     secondary_reps = {}
 
@@ -167,7 +201,6 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
         for polygon_data in polygons:
             coords = polygon_data["coords"]
             if not coords or len(coords) < 3:
-                # Not enough data to form a polygon
                 continue
 
             color = "lightgrey"
@@ -181,57 +214,9 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
             polygon = Polygon(coords, closed=True, facecolor=color, edgecolor="black", linewidth=0.5)
             ax.add_patch(polygon)
 
-    # ---------------------------
-    # Add a custom legend at the bottom with two horizontal bars
-    # One bar for "Primary Trained Muscles" (red), one for "Secondary Trained Muscles" (yellow).
-    # Each bar: 4 rectangles at 25% increments (100%, 75%, 50%, 25%, 0%).
-    # ---------------------------
-    legend_height = 0.05  # Adjust as needed
-    legend_ax = fig.add_axes([0.85, 0.7, 0.1, legend_height])  # (left, bottom, width, height)
-    legend_ax.set_xlim(0, 1)
-    legend_ax.set_ylim(0, 2)  # We'll place primary line around y=1.3, secondary around y=0.3
-    legend_ax.set_yticks([])
-    legend_ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
-    legend_ax.set_xticklabels(["0", "0.25", "0.5", "0.75", "1.0"])
-    
-    # Create a rectangle that covers the entire legend_ax from (0,0) to (1,1)
-    legend_bg = plt.Rectangle(
-        (0, 0), 1, 1, 
-        transform=legend_ax.transAxes,  # so coordinates are in axes fraction
-        facecolor=(0.9, 0.9, 0.9),       # light grey background
-        zorder=0                         # draw it behind existing elements
-    )
-    legend_ax.add_patch(legend_bg)
+    # Add the legend using the shared function
+    add_legend(fig, ax)
 
-    # Optionally draw a border
-    legend_ax.spines["left"].set_visible(True)
-    legend_ax.spines["right"].set_visible(True)
-    legend_ax.spines["top"].set_visible(True)
-    legend_ax.spines["bottom"].set_visible(True)
-    legend_ax.set_facecolor('black')
-
-    # Primary line
-    legend_ax.text(-0.15, 1.3, "Primary Trained Muscles", ha='right', va='center', fontsize=12, color='black')
-    for i in range(5):
-        alpha_val = 1.0 - 0.25 * i
-        xstart = i * 0.2
-        # We'll use a thick rectangle to simulate a wide line segment
-        rect = plt.Rectangle((xstart, 1.1), 0.2, 0.4, facecolor=(1, 0, 0, alpha_val))
-        legend_ax.add_patch(rect)
-
-    # Secondary line
-    legend_ax.text(-0.15, 0.1, "Secondary Trained Muscles", ha='right', va='center', fontsize=12, color='black')
-    for i in range(5):
-        alpha_val = 1.0 - 0.25 * i
-        xstart = i * 0.2
-        rect = plt.Rectangle((xstart, 0.1), 0.2, 0.4, facecolor=(1, 1, 0, alpha_val))
-        legend_ax.add_patch(rect)
-
-    # Note below lines
-    legend_ax.text(0.5, -1.2, "Muscles that did not get stimulated remain grey.", 
-                ha='center', va='top', fontsize=10, color='black')
-    
-    # Save to buffer
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
     plt.close(fig)
