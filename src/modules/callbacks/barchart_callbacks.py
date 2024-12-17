@@ -6,6 +6,61 @@ import json
 import dash
 
 def register_barchart_callbacks(app):
+    @app.callback(
+        [Output('stored-goals', 'data'),
+         Output('current-goals-display', 'children'),
+         Output({'type': 'goal-input', 'metric': ALL}, 'value')],
+        [Input('reset-goals-button', 'n_clicks'),
+         Input({'type': 'goal-input', 'metric': ALL}, 'value')],
+        [State({'type': 'goal-input', 'metric': ALL}, 'id'),
+         State('metric-selector', 'value'),
+         State('stored-goals', 'data')]
+    )
+    def update_goals(reset_clicks, goal_values, input_ids, selected_metric, stored_goals):
+        ctx = callback_context
+        if not ctx.triggered:
+            # Handle initial load
+            updated_values = []
+            for input_id in input_ids:
+                if input_id['metric'] == 'quick-set':
+                    updated_values.append(stored_goals.get(selected_metric, get_default_goals()[selected_metric]))
+                else:
+                    updated_values.append(stored_goals.get(input_id['metric'], get_default_goals()[input_id['metric']]))
+            return stored_goals, create_goals_display(stored_goals), updated_values
+
+        trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+        if trigger_id == 'reset-goals-button':
+            stored_goals = get_default_goals()
+        else:
+            stored_goals = stored_goals or get_default_goals()
+            trigger_dict = json.loads(trigger_id)
+
+            # Find which input triggered the callback
+            trigger_index = next(i for i, id_dict in enumerate(input_ids) if id_dict == trigger_dict)
+            new_value = goal_values[trigger_index]
+
+            if new_value is not None:
+                metric = trigger_dict['metric']
+                if metric == 'quick-set':
+                    # Update the selected metric's goal when quick-set changes
+                    stored_goals[selected_metric] = float(new_value)
+                else:
+                    # Update the specific metric's goal when table input changes
+                    stored_goals[metric] = float(new_value)
+
+        # Update all input values
+        updated_values = []
+        for input_id in input_ids:
+            if input_id['metric'] == 'quick-set':
+                # Quick-set always shows the selected metric's value
+                updated_values.append(stored_goals.get(selected_metric, get_default_goals()[selected_metric]))
+            else:
+                # Table inputs show their respective metric values
+                updated_values.append(stored_goals.get(input_id['metric'], get_default_goals()[input_id['metric']]))
+
+        return stored_goals, create_goals_display(stored_goals), updated_values
+
     # Add callback for colorblind mode toggle
     @app.callback(
         Output('colorblind-mode', 'data'),
@@ -205,3 +260,4 @@ def create_goals_display(goals):
         'marginTop': '10px',
         'backgroundColor': 'white'
     })
+
