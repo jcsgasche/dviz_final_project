@@ -1,3 +1,4 @@
+import base64
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from pathlib import Path
@@ -18,6 +19,16 @@ app = Dash(__name__,
         suppress_callback_exceptions=True)
 
 first_day_last_month, last_day_last_month = calculate_date_range()
+
+# Logo file
+logo_path = Path(__file__).parent / 'modules' / 'charts' / 'musclemap' / 'data' / 'LOGO.png'
+with open(logo_path, 'rb') as f:
+    encoded_logo = base64.b64encode(f.read()).decode()
+
+logo_image = html.Img(
+    src=f'data:image/png;base64,{encoded_logo}',
+    style={'height': '90px', 'marginLeft': '20px'}  # Adjust as needed
+)
 
 # Data stores container
 data_stores = html.Div([
@@ -53,10 +64,11 @@ floating_date_picker = dbc.Container([
 navbar = dbc.Navbar(
     dbc.Container(
         [
+            logo_image,
             html.H4(
                 "PFIFA! - Personal Functional Interactive Fitness Analysis",
                 className="mx-auto",
-                style={"color": "white", "margin": "0"}
+                style={"color": "white", "margin": "0",}
             )
         ],
         fluid=True
