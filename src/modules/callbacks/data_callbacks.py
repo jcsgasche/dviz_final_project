@@ -14,7 +14,7 @@ def register_data_callbacks(app):
         [Output('download-section', 'style', allow_duplicate=True),
          Output('clear-data-section', 'style', allow_duplicate=True),
          Output('last-update-display', 'children', allow_duplicate=True),
-         Output('data-status-container', 'children'),
+         Output('data-status-container', 'children', allow_duplicate=True),
          Output('garmin-login', 'style', allow_duplicate=True),
          Output('file-upload', 'style', allow_duplicate=True)],
         [Input('stored-data', 'modified_timestamp'),
