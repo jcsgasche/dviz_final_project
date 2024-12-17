@@ -135,7 +135,7 @@ def create_spider_chart(processed_data, start_date, end_date):
             ),
             angularaxis=dict(
                 showticklabels=True,  # Show the muscle labels
-                tickfont=dict(size=12)  # Adjust font size as needed
+                tickfont=dict(size=16)  # Adjust font size as needed
             )
         ),
         showlegend=True,
@@ -199,7 +199,7 @@ def create_empty_spider_chart(message="Waiting for you to add<br>your personal f
             'xref': 'paper',
             'yref': 'paper',
             'showarrow': False,
-            'font': {'size': 18},
+            'font': {'size': 26},
             'xanchor': 'center',
             'yanchor': 'middle',
             'align': 'center',

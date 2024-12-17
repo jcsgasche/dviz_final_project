@@ -72,7 +72,7 @@ def add_legend(fig, ax):
     legend_ax.set_ylim(0, 2)
     legend_ax.set_yticks([])
     legend_ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
-    legend_ax.set_xticklabels(["0", "0.25", "0.5", "0.75", "1.0"])
+    legend_ax.set_xticklabels(["100 %", "75 %", "50 %", "25 %", "0 %"])
 
     # Create background rectangle
     legend_bg = plt.Rectangle(
@@ -91,7 +91,7 @@ def add_legend(fig, ax):
     legend_ax.set_facecolor('black')
 
     # Primary line
-    legend_ax.text(-0.15, 1.3, "Primary Trained Muscles", ha='right', va='center', fontsize=12, color='black')
+    legend_ax.text(-0.15, 1.3, "Primary Trained Muscles", ha='right', va='center', fontsize=16, color='black')
     for i in range(5):
         alpha_val = 1.0 - 0.25 * i
         xstart = i * 0.2
@@ -99,7 +99,7 @@ def add_legend(fig, ax):
         legend_ax.add_patch(rect)
 
     # Secondary line
-    legend_ax.text(-0.15, 0.1, "Secondary Trained Muscles", ha='right', va='center', fontsize=12, color='black')
+    legend_ax.text(-0.15, 0.1, "Secondary Trained Muscles", ha='right', va='center', fontsize=16, color='black')
     for i in range(5):
         alpha_val = 1.0 - 0.25 * i
         xstart = i * 0.2
@@ -108,7 +108,7 @@ def add_legend(fig, ax):
 
     # Note below lines
     legend_ax.text(0.5, -1.2, "Muscles that did not get stimulated remain grey.",
-                   ha='center', va='top', fontsize=10, color='black')
+                   ha='center', va='top', fontsize=14, color='black')
 
 def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Waiting for you to add\nyour personal fitness data"):
     """Create an empty muscle map with grey muscles and a message"""
@@ -149,7 +149,7 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
     plt.text(center_x, center_y, message,
              horizontalalignment='center',
              verticalalignment='center',
-             fontsize=18,
+             fontsize=16,
              color='#000000',
              bbox=bg_box,
              linespacing=1.2)
