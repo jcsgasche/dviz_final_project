@@ -6,6 +6,14 @@ import json
 import dash
 
 def register_barchart_callbacks(app):
+    # Add callback for colorblind mode toggle
+    @app.callback(
+        Output('colorblind-mode', 'data'),
+        Input('colorblind-toggle', 'value')
+    )
+    def update_colorblind_mode(value):
+        return True if value else False
+
     @app.callback(
         [Output('initial-loading-div', 'style'),
          Output('data-loaded-div', 'style')],
@@ -23,12 +31,14 @@ def register_barchart_callbacks(app):
          Input('date-range', 'end_date'),
          Input('stored-data', 'data'),
          Input('stored-goals', 'data'),
-         Input('activity-graph', 'relayoutData')],
+         Input('activity-graph', 'relayoutData'),
+         Input('colorblind-mode', 'data')],  # Add colorblind mode input
         prevent_initial_call=True
     )
-    def update_chart(selected_metric, start_date, end_date, stored_data, stored_goals, relayout_data):
+    def update_chart(selected_metric, start_date, end_date, stored_data, stored_goals,
+                     relayout_data, colorblind_mode):
         if not stored_data or not stored_goals:
-            return {}  # Empty figure since this div won't be visible anyway
+            return {}
 
         df = pd.DataFrame(stored_data)
         df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
@@ -39,14 +49,14 @@ def register_barchart_callbacks(app):
             start_date = relayout_data['xaxis.range[0]'][:10]
             end_date = relayout_data['xaxis.range[1]'][:10]
 
-        # Check if there's any data in the filtered period
         mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
         filtered_df = df.loc[mask]
 
         if len(filtered_df) == 0:
             return create_empty_chart("No data available<br>in this period of time")
 
-        return create_activity_chart(filtered_df, selected_metric, start_date, end_date, goal_value)
+        return create_activity_chart(filtered_df, selected_metric, start_date, end_date,
+                                     goal_value, colorblind_mode)
 
     @app.callback(
         Output('summary-graph', 'figure'),
@@ -56,11 +66,12 @@ def register_barchart_callbacks(app):
          Input('stored-goals', 'data'),
          Input('view-type', 'data'),
          Input('summary-type', 'value'),
-         Input('summary-metrics-selector', 'value')],
+         Input('summary-metrics-selector', 'value'),
+         Input('colorblind-mode', 'data')],  # Add colorblind mode input
         prevent_initial_call=True
     )
     def update_summary_chart(start_date, end_date, stored_data, stored_goals,
-                             view_type, summary_type, selected_metrics):
+                             view_type, summary_type, selected_metrics, colorblind_mode):
         if not stored_data or not stored_goals or view_type == 'detail':
             return create_empty_chart("Waiting for you to add<br>your personal fitness data")
 
@@ -73,65 +84,9 @@ def register_barchart_callbacks(app):
         if len(filtered_df) == 0:
             return create_empty_chart("No data available<br>in this period of time")
 
-        # Pass selected metrics only if in custom mode
         metrics_to_show = selected_metrics if summary_type == 'custom' else None
         return create_summary_chart(filtered_df, start_date, end_date,
-                                    stored_goals, metrics_to_show)
-
-    @app.callback(
-        [Output('stored-goals', 'data'),
-         Output('current-goals-display', 'children'),
-         Output({'type': 'goal-input', 'metric': ALL}, 'value')],
-        [Input('reset-goals-button', 'n_clicks'),
-         Input({'type': 'goal-input', 'metric': ALL}, 'value')],
-        [State({'type': 'goal-input', 'metric': ALL}, 'id'),
-         State('metric-selector', 'value'),
-         State('stored-goals', 'data')]
-    )
-    def update_goals(reset_clicks, goal_values, input_ids, selected_metric, stored_goals):
-        ctx = callback_context
-        if not ctx.triggered:
-            # Handle initial load
-            updated_values = []
-            for input_id in input_ids:
-                if input_id['metric'] == 'quick-set':
-                    updated_values.append(stored_goals.get(selected_metric, get_default_goals()[selected_metric]))
-                else:
-                    updated_values.append(stored_goals.get(input_id['metric'], get_default_goals()[input_id['metric']]))
-            return stored_goals, create_goals_display(stored_goals), updated_values
-
-        trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
-
-        if trigger_id == 'reset-goals-button':
-            stored_goals = get_default_goals()
-        else:
-            stored_goals = stored_goals or get_default_goals()
-            trigger_dict = json.loads(trigger_id)
-
-            # Find which input triggered the callback
-            trigger_index = next(i for i, id_dict in enumerate(input_ids) if id_dict == trigger_dict)
-            new_value = goal_values[trigger_index]
-
-            if new_value is not None:
-                metric = trigger_dict['metric']
-                if metric == 'quick-set':
-                    # Update the selected metric's goal when quick-set changes
-                    stored_goals[selected_metric] = float(new_value)
-                else:
-                    # Update the specific metric's goal when table input changes
-                    stored_goals[metric] = float(new_value)
-
-        # Update all input values
-        updated_values = []
-        for input_id in input_ids:
-            if input_id['metric'] == 'quick-set':
-                # Quick-set always shows the selected metric's value
-                updated_values.append(stored_goals.get(selected_metric, get_default_goals()[selected_metric]))
-            else:
-                # Table inputs show their respective metric values
-                updated_values.append(stored_goals.get(input_id['metric'], get_default_goals()[input_id['metric']]))
-
-        return stored_goals, create_goals_display(stored_goals), updated_values
+                                    stored_goals, metrics_to_show, colorblind_mode)
 
     @app.callback(
         Output({'type': 'goal-input', 'metric': 'quick-set'}, 'value', allow_duplicate=True),
