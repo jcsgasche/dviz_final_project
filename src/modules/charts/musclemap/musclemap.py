@@ -21,7 +21,6 @@ def create_musclemap_layout():
             ),
         ]),
 
-        # Container for both visualizations
         html.Div([
             # Original muscle map
             html.Div([
@@ -29,12 +28,19 @@ def create_musclemap_layout():
                     id='muscle-map-image',
                     style={
                         'width': '100%',
-                        'maxWidth': '800px',
+                        'max-width': '1100px',  # Increased from 800px
+                        'height': 'auto',
                         'margin': 'auto',
                         'display': 'block'
                     }
                 ),
-            ], id='muscle-map-container', style={'display': 'block'}),
+            ], id='muscle-map-container', style={
+                'display': 'block',
+                'width': '80%',  # Increased from 60%
+                'min-width': '300px',
+                'max-width': '1100px',  # Increased from 800px
+                'margin': 'auto'
+            }),
 
             # Spider chart
             html.Div([
