@@ -13,7 +13,8 @@ def create_musclemap_layout():
                 id='muscle-map-image',
                 style={
                     'width': '100%',
-                    'max-width': '1100px',
+                    'min-width': '900px',
+                    'max-width': '1500px',
                     'height': 'auto',
                     'margin': 'auto',
                     'display': 'block'
@@ -21,9 +22,9 @@ def create_musclemap_layout():
             ),
         ], id='muscle-map-container', style={
             'display': 'block',
-            'width': '80%',
-            'min-width': '300px',
-            'max-width': '1100px',
+            'width': '100%',
+            'min-width': '900px',
+            'max-width': '1500px',
             'margin': 'auto'
         }),
         dcc.Store(id='processed-strength-data-store'),
