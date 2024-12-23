@@ -14,10 +14,13 @@ def register_musclemap_callbacks(app):
          Input('date-range', 'start_date'),
          Input('date-range', 'end_date'),
          Input('stored-data', 'modified_timestamp'),
-         Input('colorblind-toggle', 'value')],  # Add colorblind toggle input
+         Input('global-colorblind-toggle', 'value')],  # Changed to correct ID
         [State('stored-data', 'data')]
     )
     def update_muscle_visualizations(raw_data, start_date, end_date, ts, colorblind_mode, stored_data):
+        # Convert colorblind_mode from list to boolean
+        colorblind_enabled = bool(colorblind_mode and True in colorblind_mode)
+
         if not raw_data:
             script_dir = os.path.dirname(os.path.abspath(__file__))
             coordinates_path = os.path.join(script_dir, '..', 'charts', 'musclemap', 'data', 'muscle_coordinates.json')
@@ -26,7 +29,7 @@ def register_musclemap_callbacks(app):
                 muscle_coordinates,
                 zoom_out_factor=1.5,
                 message="Waiting for you to add your personal fitness data",
-                colorblind_mode=bool(colorblind_mode)  # Pass colorblind mode
+                colorblind_mode=colorblind_enabled
             )
             empty_src = f"data:image/png;base64,{empty_img}"
             return None, empty_src
@@ -63,7 +66,7 @@ def register_musclemap_callbacks(app):
                 muscle_coordinates,
                 zoom_out_factor=1.5,
                 message="No data available in this period of time",
-                colorblind_mode=bool(colorblind_mode)  # Pass colorblind mode
+                colorblind_mode=colorblind_enabled
             )
             empty_src = f"data:image/png;base64,{empty_img}"
             return None, empty_src
@@ -78,7 +81,7 @@ def register_musclemap_callbacks(app):
             processed_data,
             muscle_coordinates,
             zoom_out_factor=1.5,
-            colorblind_mode=bool(colorblind_mode)  # Pass colorblind mode
+            colorblind_mode=colorblind_enabled
         )
 
         img_src = f"data:image/png;base64,{img_data}"

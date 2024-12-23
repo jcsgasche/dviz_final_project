@@ -400,18 +400,8 @@ def create_data_loaded_div(first_day_last_month, last_day_last_month):
 
         # Container for controls
         html.Div([
-            # Add colorblind mode toggle
-            html.Div([
-                dbc.Checklist(
-                    options=[
-                        {"label": "Colorblind Friendly Mode", "value": True}
-                    ],
-                    value=[],
-                    id="colorblind-toggle",
-                    switch=True,  # This makes it look like a toggle switch
-                    style={'marginBottom': '10px'}
-                ),
-            ]),
+            # Remove colorblind toggle since it's now global
+
             # Toggle button
             html.Button(
                 "Toggle View",
@@ -461,12 +451,12 @@ def create_data_loaded_div(first_day_last_month, last_day_last_month):
             dcc.Graph(id="summary-graph", style={'display': 'none'}),
         ]),
 
-        # Goals management section with collapse functionality
+        # Goals management section
         html.Div([
             html.Div([
                 html.H3("Metric Goals", style={'marginTop': '20px', 'display': 'inline-block'}),
                 html.Button(
-                    "⯆",  # Black down-pointing triangle (Unicode: U+2BC6)
+                    "⯆",
                     id='collapse-goals-button',
                     n_clicks=0,
                     style={
@@ -489,10 +479,9 @@ def create_data_loaded_div(first_day_last_month, last_day_last_month):
                     html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
                 ],
                 id='goals-collapse',
-                is_open=True  # Initially expanded
+                is_open=True
             )
         ]),
-        dcc.Store(id='colorblind-mode', data=False)
     ], id='data-loaded-div', style={'display': 'none'})
 
 def create_barchart_layout(first_day_last_month, last_day_last_month):

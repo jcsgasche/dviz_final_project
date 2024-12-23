@@ -1,5 +1,5 @@
 import base64
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from pathlib import Path
 
@@ -35,9 +35,11 @@ data_stores = html.Div([
     dcc.Store(id='stored-data', storage_type='local'),
     dcc.Store(id='strength-data-store', storage_type='local'),
     dcc.Store(id='last-update-time', storage_type='local'),
+    # Remove global-settings store since we're using the toggle directly
 ])
 
-floating_date_picker = dbc.Container([
+floating_controls = dbc.Container([
+    # Date Range Card
     dbc.Card([
         dbc.CardBody([
             html.H6("Date Range", className="mb-3"),
@@ -48,10 +50,36 @@ floating_date_picker = dbc.Container([
                 className="mb-2"
             ),
         ])
-    ], className="shadow-sm",
+    ], className="shadow-sm mb-3",
         style={
             'position': 'fixed',
             'top': '80px',
+            'right': '20px',
+            'zIndex': 1000,
+            'width': 'auto',
+            'minWidth': '300px',
+            'backgroundColor': 'white',
+            'borderRadius': '4px'
+        }),
+
+    # Settings Card
+    dbc.Card([
+        dbc.CardBody([
+            html.H6("Display Settings", className="mb-3"),
+            dbc.Checklist(
+                options=[
+                    {"label": "Colorblind Friendly Mode", "value": True}
+                ],
+                value=[],
+                id="global-colorblind-toggle",
+                switch=True,
+                className="mb-2"
+            ),
+        ])
+    ], className="shadow-sm",
+        style={
+            'position': 'fixed',
+            'top': '200px',
             'right': '20px',
             'zIndex': 1000,
             'width': 'auto',
@@ -77,14 +105,12 @@ navbar = dbc.Navbar(
     dark=True
 )
 
+# Update the main layout
 app.layout = html.Div([
     navbar,
-    # All data stores in one place
     data_stores,
-    # Status container for messages
     html.Div(id='data-status-container'),
-
-    floating_date_picker,
+    floating_controls,  # Use the new floating controls instead of just date picker
     dbc.Container([
         dbc.Row([
             dbc.Col([

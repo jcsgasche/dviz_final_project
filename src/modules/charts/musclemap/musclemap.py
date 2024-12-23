@@ -6,22 +6,13 @@ import json
 
 # Updated musclemap.py
 
+# Updated musclemap.py
+
 def create_musclemap_layout():
     return html.Div([
         html.H1("Muscle Activity Map"),
 
-        # Add colorblind mode toggle
-        html.Div([
-            dbc.Checklist(
-                options=[
-                    {"label": "Colorblind Friendly Mode", "value": True}
-                ],
-                value=[],
-                id="colorblind-toggle",
-                switch=True,  # This makes it look like a toggle switch
-                style={'marginBottom': '10px'}
-            ),
-        ]),
+        # Remove colorblind toggle since it's now global
 
         html.Div([
             html.Img(

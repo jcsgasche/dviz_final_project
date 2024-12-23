@@ -81,68 +81,61 @@ def register_barchart_callbacks(app):
         return {'display': 'none'}, {'display': 'block'}
 
     @app.callback(
-        Output('activity-graph', 'figure'),
-        [Input('metric-selector', 'value'),
+        Output("activity-graph", "figure"),
+        [Input('stored-data', 'data'),
+         Input('metric-selector', 'value'),
          Input('date-range', 'start_date'),
          Input('date-range', 'end_date'),
-         Input('stored-data', 'data'),
          Input('stored-goals', 'data'),
-         Input('activity-graph', 'relayoutData'),
-         Input('colorblind-mode', 'data')],
-        prevent_initial_call=True
+         Input('global-colorblind-toggle', 'value')]
     )
-    def update_chart(selected_metric, start_date, end_date, stored_data, stored_goals,
-                     relayout_data, colorblind_mode):
-        if not stored_data or not stored_goals:
-            return {}
-
-        df = pd.DataFrame(stored_data)
-        df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
-
-        goal_value = stored_goals.get(selected_metric, get_default_goals()[selected_metric])
-
-        if relayout_data and 'xaxis.range[0]' in relayout_data:
-            start_date = relayout_data['xaxis.range[0]'][:10]
-            end_date = relayout_data['xaxis.range[1]'][:10]
-
-        mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
-        filtered_df = df.loc[mask]
-
-        if len(filtered_df) == 0:
-            return create_empty_chart("No data available<br>in this period of time")
-
-        return create_activity_chart(filtered_df, selected_metric, start_date, end_date,
-                                     goal_value, colorblind_mode)
-
-    @app.callback(
-        Output('summary-graph', 'figure'),
-        [Input('date-range', 'start_date'),
-         Input('date-range', 'end_date'),
-         Input('stored-data', 'data'),
-         Input('stored-goals', 'data'),
-         Input('view-type', 'data'),
-         Input('summary-type', 'value'),
-         Input('summary-metrics-selector', 'value'),
-         Input('colorblind-mode', 'data')],
-        prevent_initial_call=True
-    )
-    def update_summary_chart(start_date, end_date, stored_data, stored_goals,
-                             view_type, summary_type, selected_metrics, colorblind_mode):
-        if not stored_data or not stored_goals or view_type == 'detail':
+    def update_activity_graph(data, selected_metric, start_date, end_date, stored_goals, colorblind_mode):
+        if data is None:
             return create_empty_chart("Waiting for you to add<br>your personal fitness data")
 
-        df = pd.DataFrame(stored_data)
-        df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
+        colorblind_enabled = bool(colorblind_mode and True in colorblind_mode)
 
-        mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
-        filtered_df = df.loc[mask]
+        try:
+            # Handle data whether it's a string or already a list
+            if isinstance(data, str):
+                df = pd.read_json(data)
+            else:
+                df = pd.DataFrame(data)
 
-        if len(filtered_df) == 0:
-            return create_empty_chart("No data available<br>in this period of time")
+            goal_value = stored_goals.get(selected_metric, get_default_goals()[selected_metric])
+            return create_activity_chart(df, selected_metric, start_date, end_date, goal_value, colorblind_enabled)
+        except Exception as e:
+            print(f"Error updating activity graph: {e}")
+            return create_empty_chart("Error loading data")
 
-        metrics_to_show = selected_metrics if summary_type == 'custom' else None
-        return create_summary_chart(filtered_df, start_date, end_date,
-                                    stored_goals, metrics_to_show, colorblind_mode)
+    @app.callback(
+        Output("summary-graph", "figure"),
+        [Input('stored-data', 'data'),
+         Input('date-range', 'start_date'),
+         Input('date-range', 'end_date'),
+         Input('stored-goals', 'data'),
+         Input('summary-type', 'value'),
+         Input('summary-metrics-selector', 'value'),
+         Input('global-colorblind-toggle', 'value')]
+    )
+    def update_summary_graph(data, start_date, end_date, stored_goals, summary_type, selected_metrics, colorblind_mode):
+        if data is None:
+            return create_empty_chart("Waiting for you to add<br>your personal fitness data")
+
+        colorblind_enabled = bool(colorblind_mode and True in colorblind_mode)
+
+        try:
+            # Handle data whether it's a string or already a list
+            if isinstance(data, str):
+                df = pd.DataFrame(json.loads(data))
+            else:
+                df = pd.DataFrame(data)
+
+            metrics_to_show = None if summary_type == 'all' else selected_metrics
+            return create_summary_chart(df, start_date, end_date, stored_goals, metrics_to_show, colorblind_enabled)
+        except Exception as e:
+            print(f"Error updating summary graph: {e}")
+            return create_empty_chart("Error loading data")
 
     @app.callback(
         Output({'type': 'goal-input', 'metric': 'quick-set'}, 'value', allow_duplicate=True),
