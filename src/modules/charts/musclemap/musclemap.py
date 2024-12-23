@@ -4,57 +4,29 @@ import plotly.graph_objects as go
 import json
 
 # modules/charts/musclemap/musclemap.py
+# Remove toggle button and spider chart container
 def create_musclemap_layout():
-    """Create the layout for the muscle map visualization with spider chart toggle"""
     return html.Div([
         html.H1("Muscle Activity Map"),
-
-        # Toggle button container
         html.Div([
-            html.Button(
-                "Toggle View",
-                id='toggle-muscle-view',
-                n_clicks=0,
+            html.Img(
+                id='muscle-map-image',
                 style={
-                    'marginBottom': '10px',
+                    'width': '100%',
+                    'max-width': '1100px',
+                    'height': 'auto',
+                    'margin': 'auto',
+                    'display': 'block'
                 }
             ),
-        ]),
-
-        html.Div([
-            # Original muscle map
-            html.Div([
-                html.Img(
-                    id='muscle-map-image',
-                    style={
-                        'width': '100%',
-                        'max-width': '1100px',  # Increased from 800px
-                        'height': 'auto',
-                        'margin': 'auto',
-                        'display': 'block'
-                    }
-                ),
-            ], id='muscle-map-container', style={
-                'display': 'block',
-                'width': '80%',  # Increased from 60%
-                'min-width': '300px',
-                'max-width': '1100px',  # Increased from 800px
-                'margin': 'auto'
-            }),
-
-            # Spider chart
-            html.Div([
-                dcc.Graph(
-                    id='muscle-spider-chart',
-                    style={'height': '600px'},
-                    figure=create_empty_spider_chart()
-                ),
-            ], id='spider-chart-container', style={'display': 'none'}),
-
-            # Store components - only keep those not in app.py
-            dcc.Store(id='processed-strength-data-store'),
-            dcc.Store(id='muscle-view-type', data='map'),
-        ])
+        ], id='muscle-map-container', style={
+            'display': 'block',
+            'width': '80%',
+            'min-width': '300px',
+            'max-width': '1100px',
+            'margin': 'auto'
+        }),
+        dcc.Store(id='processed-strength-data-store'),
     ])
 
 def create_spider_chart(processed_data, start_date, end_date):

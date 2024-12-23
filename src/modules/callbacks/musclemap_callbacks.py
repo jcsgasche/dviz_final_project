@@ -9,17 +9,15 @@ from modules.charts.musclemap.musclemap import create_spider_chart, create_empty
 def register_musclemap_callbacks(app):
     @app.callback(
         [Output('processed-strength-data-store', 'data'),
-         Output('muscle-map-image', 'src'),
-         Output('muscle-spider-chart', 'figure')],
+         Output('muscle-map-image', 'src')],
         [Input('strength-data-store', 'data'),
          Input('date-range', 'start_date'),
          Input('date-range', 'end_date'),
-         Input('stored-data', 'modified_timestamp')],  # Add this to trigger on data load
-        [State('stored-data', 'data')]  # Add this to access persisted data
+         Input('stored-data', 'modified_timestamp')],
+        [State('stored-data', 'data')]
     )
     def update_muscle_visualizations(raw_data, start_date, end_date, ts, stored_data):
         if not raw_data:
-            # Create empty muscle map image
             script_dir = os.path.dirname(os.path.abspath(__file__))
             coordinates_path = os.path.join(script_dir, '..', 'charts', 'musclemap', 'data', 'muscle_coordinates.json')
             muscle_coordinates = musclemap_plot.load_and_parse_muscle_coordinates(coordinates_path)
@@ -29,14 +27,13 @@ def register_musclemap_callbacks(app):
                 message="Waiting for you to add your personal fitness data"
             )
             empty_src = f"data:image/png;base64,{empty_img}"
-            return None, empty_src, create_empty_spider_chart()
+            return None, empty_src
 
         try:
             strength_activities = json.loads(raw_data)
         except (json.JSONDecodeError, TypeError):
-            return None, None, create_empty_spider_chart("Error processing data")
+            return None, None
 
-        # Filter activities by date range
         filtered_activities = []
         start = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
         end = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
@@ -57,7 +54,6 @@ def register_musclemap_callbacks(app):
                 continue
 
         if not filtered_activities:
-            # Create empty muscle map with no data message
             script_dir = os.path.dirname(os.path.abspath(__file__))
             coordinates_path = os.path.join(script_dir, '..', 'charts', 'musclemap', 'data', 'muscle_coordinates.json')
             muscle_coordinates = musclemap_plot.load_and_parse_muscle_coordinates(coordinates_path)
@@ -67,12 +63,10 @@ def register_musclemap_callbacks(app):
                 message="No data available in this period of time"
             )
             empty_src = f"data:image/png;base64,{empty_img}"
-            return None, empty_src, create_empty_spider_chart("No data available in this period of time")
+            return None, empty_src
 
-        # Process the filtered activities
         processed_data = musclemap_load.process_strength_activities(filtered_activities)
 
-        # Generate muscle map image
         script_dir = os.path.dirname(os.path.abspath(__file__))
         coordinates_path = os.path.join(script_dir, '..', 'charts', 'musclemap', 'data', 'muscle_coordinates.json')
         muscle_coordinates = musclemap_plot.load_and_parse_muscle_coordinates(coordinates_path)
@@ -85,10 +79,7 @@ def register_musclemap_callbacks(app):
 
         img_src = f"data:image/png;base64,{img_data}"
 
-        # Generate spider chart
-        spider_fig = create_spider_chart(processed_data, start_date, end_date)
-
-        return json.dumps(processed_data), img_src, spider_fig
+        return json.dumps(processed_data), img_src
 
     @app.callback(
         [Output('muscle-map-container', 'style'),
