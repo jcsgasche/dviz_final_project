@@ -276,9 +276,8 @@ def create_spider_chart(ax, muscle_activity, position=SPIDER_CHART_POSITION, col
 
     ax_spider = plt.axes(position, projection='polar')
 
-    color_scheme = COLOR_SCHEMES['colorblind'] if colorblind_mode else COLOR_SCHEMES['default']
-    line_color = color_scheme['primary']['base']
-    fill_color = get_color_with_intensity(color_scheme['primary'], 0.25)
+    line_color = 'black'
+    fill_color = (0, 0, 0, 0.25)
 
     ax_spider.plot(angles, values, 'o-', linewidth=2, color=line_color)
     ax_spider.fill(angles, values, alpha=0.25, color=fill_color)
