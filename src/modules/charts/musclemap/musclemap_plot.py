@@ -11,6 +11,12 @@ import io
 import base64
 import numpy as np
 
+# Constants for consistent sizing
+FIGURE_SIZE = (27, 15)
+MAIN_AXES_POSITION = [0.1, 0.1, 0.8, 0.8]
+SPIDER_CHART_POSITION = [0.71, 0.2, 0.4, 0.4]
+LEGEND_POSITION = [0.85, 0.75, 0.2, 0.05]
+
 def parse_svg_path(d):
     """Parse raw SVG paths into coordinate lists."""
     path_data = re.findall(r"[-+]?[0-9]*\.?[0-9]+", d)
@@ -30,8 +36,7 @@ def apply_transformation(coords, transform):
         for x, y in coords
     ]
 
-def create_spider_chart(ax, muscle_activity, position, size):
-    # Format category names by adding spaces before capital letters
+def create_spider_chart(ax, muscle_activity, position=SPIDER_CHART_POSITION, size=0.4):
     def format_muscle_name(name):
         return re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
 
@@ -45,19 +50,11 @@ def create_spider_chart(ax, muscle_activity, position, size):
     angles += angles[:1]
 
     values = list(muscle_activity.values())
-    # Always normalize to percentage of maximum value
     max_value = max(values) if values and max(values) > 0 else 1
-    # Normalize values between 0 and 1
     values = [v / max_value if max_value != 0 else 0 for v in values]
-    # Close the polygon by appending the first value
     values += values[:1]
 
-    # Make sure we display all tick marks even with zero values
-    if all(v == 0 for v in values):
-        values = [0] * (len(values))
-
     ax_spider = plt.axes(position, projection='polar')
-    # Use fixed styling
     ax_spider.plot(angles, values, 'o-', linewidth=2, color='blue')
     ax_spider.fill(angles, values, alpha=0.25, color='blue')
 
@@ -65,6 +62,7 @@ def create_spider_chart(ax, muscle_activity, position, size):
     labels = ax_spider.set_xticklabels(categories, size=14)
     ax_spider.set_rlabel_position(0)
 
+    # Label rotation logic
     for idx, label in enumerate(labels):
         angle = angles[idx] * 180/np.pi
         if angle < 90:
@@ -80,36 +78,28 @@ def create_spider_chart(ax, muscle_activity, position, size):
             label.set_rotation(angle)
             label.set_horizontalalignment('left')
 
-    # Set fixed tick marks at 20% intervals
     yticks = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
     ax_spider.set_ylim(0, 1)
     ax_spider.set_facecolor('white')
     ax_spider.patch.set_alpha(0.8)
     ax_spider.set_rticks(yticks)
-    yticklabels = [f'{int(y*100)}%' for y in yticks]
-    ax_spider.set_yticklabels(yticklabels, fontsize=12)
-
-    # Add gridlines
+    ax_spider.set_yticklabels([f'{int(y*100)}%' for y in yticks], fontsize=12)
     ax_spider.grid(True, color='gray', alpha=0.3)
 
-    # Make sure the ticks are always visible
     for tick in ax_spider.yaxis.get_ticklabels():
         tick.set_visible(True)
 
     return ax_spider
 
-
 def add_legend(fig, ax):
     """Add the legend to the muscle map"""
-    legend_height = 0.05
-    legend_ax = fig.add_axes([0.85, 0.75, 0.2, legend_height])
+    legend_ax = fig.add_axes(LEGEND_POSITION)
     legend_ax.set_xlim(0, 1)
     legend_ax.set_ylim(0, 2)
     legend_ax.set_yticks([])
     legend_ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
-    legend_ax.set_xticklabels(["100 %", "75 %", "50 %", "25 %", "0 %"], fontsize=14)  # Increased font size
+    legend_ax.set_xticklabels(["100 %", "75 %", "50 %", "25 %", "0 %"], fontsize=14)
 
-    # Create background rectangle
     legend_bg = plt.Rectangle(
         (0, 0), 1, 1,
         transform=legend_ax.transAxes,
@@ -123,7 +113,6 @@ def add_legend(fig, ax):
     legend_ax.spines["top"].set_visible(True)
     legend_ax.spines["bottom"].set_visible(True)
 
-    # Add legend entries with adjusted position and larger font size
     legend_ax.text(-0.15, 1.3, "Primary Trained Muscles", ha='right', va='center', fontsize=16)
     for i in range(5):
         alpha_val = 1.0 - 0.25 * i
@@ -144,7 +133,7 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
         return create_empty_muscle_map(muscle_coordinates, zoom_out_factor,
                                        message="No data available\nin this period of time")
 
-    # Calculate repetitions for both visualizations
+    # Calculate muscle activity
     primary_reps = {}
     secondary_reps = {}
     muscle_activity = {}
@@ -153,26 +142,21 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
         for exercise in activity['exercises']:
             reps = exercise.get('repetitions', 0) * exercise.get('sets', 1)
 
-            # Process for muscle map
             for muscle in exercise['primary_muscles']:
                 if muscle != 'Undefined':
                     primary_reps[muscle] = primary_reps.get(muscle, 0) + reps
-                    # Aggregate for spider chart (removing Right/Left)
                     base_muscle = muscle.replace('Right', '').replace('Left', '')
                     muscle_activity[base_muscle] = muscle_activity.get(base_muscle, 0) + reps
 
             for muscle in exercise['secondary_muscles']:
                 if muscle != 'Undefined':
                     secondary_reps[muscle] = secondary_reps.get(muscle, 0) + reps * 0.5
-                    # Add secondary muscles with half weight
                     base_muscle = muscle.replace('Right', '').replace('Left', '')
                     muscle_activity[base_muscle] = muscle_activity.get(base_muscle, 0) + reps * 0.5
 
-    # Create main figure with larger size
-    fig = plt.figure(figsize=(27, 15))  # Increased from (19.8, 10.8)
-
-    # Create main axes for muscle map with adjusted width
-    ax_main = plt.axes([0.1, 0.1, 0.8, 0.8])
+    # Create figure with consistent size
+    fig = plt.figure(figsize=FIGURE_SIZE)
+    ax_main = plt.axes(MAIN_AXES_POSITION)
 
     xlim = (-110 * zoom_out_factor, 700 * zoom_out_factor)
     ylim = (-25 * zoom_out_factor, 575 * zoom_out_factor)
@@ -202,43 +186,33 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
             polygon = Polygon(coords, closed=True, facecolor=color, edgecolor="black", linewidth=0.5)
             ax_main.add_patch(polygon)
 
-    # Add legend
     add_legend(fig, ax_main)
 
-    # Initialize a complete muscle activity dictionary with zeros
+    # Initialize complete muscle activity dictionary
     complete_muscle_activity = {
         'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
         'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
         'BackGlutes': 0, 'BackHamstrings': 0
     }
 
-    # Update with any actual activity
+    # Update with actual activity
     for muscle, value in muscle_activity.items():
         if muscle in complete_muscle_activity:
             complete_muscle_activity[muscle] = value
 
-    spider_chart = create_spider_chart(
-        ax_main,
-        complete_muscle_activity,
-        [0.71, 0.2, 0.4, 0.4],
-        0.3
-    )
+    create_spider_chart(ax_main, complete_muscle_activity)
 
-    # Save with higher DPI and quality
+    # Save with consistent quality
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200)  # Increased DPI from 150 to 200
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200)
     plt.close(fig)
     buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode('utf-8')
-    return img_data
+    return base64.b64encode(buf.read()).decode('utf-8')
 
 def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Waiting for you to add\nyour personal fitness data"):
-    """Create an empty muscle map with grey muscles and a message"""
-    # Create main figure with larger size
-    fig = plt.figure(figsize=(24, 13.5))  # Increased from (19.8, 10.8)
-
-    # Create main axes for muscle map
-    ax_main = plt.axes([0.1, 0.1, 0.8, 0.8])
+    """Create an empty muscle map with consistent sizing"""
+    fig = plt.figure(figsize=FIGURE_SIZE)
+    ax_main = plt.axes(MAIN_AXES_POSITION)
 
     xlim = (-110 * zoom_out_factor, 700 * zoom_out_factor)
     ylim = (-25 * zoom_out_factor, 575 * zoom_out_factor)
@@ -277,29 +251,22 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
              bbox=bg_box,
              linespacing=1.2)
 
-    # Add legend
     add_legend(fig, ax_main)
 
-    # Create empty spider chart with consistent axes
+    # Create empty spider chart with same positioning as filled version
     empty_muscle_activity = {
-        'Front Chest': 0, 'Back Lats': 0, 'Front Deltoids': 0, 'Back Deltoids': 0,
-        'Front Abs': 0, 'Back Triceps': 0, 'Front Biceps': 0, 'Front Quads': 0,
-        'Back Glutes': 0, 'Back Hamstrings': 0
+        'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
+        'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
+        'BackGlutes': 0, 'BackHamstrings': 0
     }
-    create_spider_chart(
-        ax_main,
-        empty_muscle_activity,  # Use the full set of muscles with zeros
-        [0.75, 0.2, 0.3, 0.3],  # Moved left and increased size [left, bottom, width, height]
-        0.3
-    )
+    create_spider_chart(ax_main, empty_muscle_activity)
 
-    # Save and return
+    # Save with consistent quality
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200)  # Increased DPI from 150 to 200
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=200)
     plt.close(fig)
     buf.seek(0)
-    img_data = base64.b64encode(buf.read()).decode('utf-8')
-    return img_data
+    return base64.b64encode(buf.read()).decode('utf-8')
 
 def load_and_parse_muscle_coordinates(filename):
     file_path = os.path.abspath(filename)
