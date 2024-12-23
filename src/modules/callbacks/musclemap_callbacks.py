@@ -13,10 +13,11 @@ def register_musclemap_callbacks(app):
         [Input('strength-data-store', 'data'),
          Input('date-range', 'start_date'),
          Input('date-range', 'end_date'),
-         Input('stored-data', 'modified_timestamp')],
+         Input('stored-data', 'modified_timestamp'),
+         Input('colorblind-toggle', 'value')],  # Add colorblind toggle input
         [State('stored-data', 'data')]
     )
-    def update_muscle_visualizations(raw_data, start_date, end_date, ts, stored_data):
+    def update_muscle_visualizations(raw_data, start_date, end_date, ts, colorblind_mode, stored_data):
         if not raw_data:
             script_dir = os.path.dirname(os.path.abspath(__file__))
             coordinates_path = os.path.join(script_dir, '..', 'charts', 'musclemap', 'data', 'muscle_coordinates.json')
@@ -24,7 +25,8 @@ def register_musclemap_callbacks(app):
             empty_img = musclemap_plot.create_empty_muscle_map(
                 muscle_coordinates,
                 zoom_out_factor=1.5,
-                message="Waiting for you to add your personal fitness data"
+                message="Waiting for you to add your personal fitness data",
+                colorblind_mode=bool(colorblind_mode)  # Pass colorblind mode
             )
             empty_src = f"data:image/png;base64,{empty_img}"
             return None, empty_src
@@ -60,7 +62,8 @@ def register_musclemap_callbacks(app):
             empty_img = musclemap_plot.create_empty_muscle_map(
                 muscle_coordinates,
                 zoom_out_factor=1.5,
-                message="No data available in this period of time"
+                message="No data available in this period of time",
+                colorblind_mode=bool(colorblind_mode)  # Pass colorblind mode
             )
             empty_src = f"data:image/png;base64,{empty_img}"
             return None, empty_src
@@ -74,7 +77,8 @@ def register_musclemap_callbacks(app):
         img_data = musclemap_plot.plot_muscle_map(
             processed_data,
             muscle_coordinates,
-            zoom_out_factor=1.5
+            zoom_out_factor=1.5,
+            colorblind_mode=bool(colorblind_mode)  # Pass colorblind mode
         )
 
         img_src = f"data:image/png;base64,{img_data}"

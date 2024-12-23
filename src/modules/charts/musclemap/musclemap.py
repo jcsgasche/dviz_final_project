@@ -1,11 +1,28 @@
 # modules/charts/musclemap/musclemap.py
 from dash import html, dcc
+import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import json
+
+# Updated musclemap.py
 
 def create_musclemap_layout():
     return html.Div([
         html.H1("Muscle Activity Map"),
+
+        # Add colorblind mode toggle
+        html.Div([
+            dbc.Checklist(
+                options=[
+                    {"label": "Colorblind Friendly Mode", "value": True}
+                ],
+                value=[],
+                id="colorblind-toggle",
+                switch=True,  # This makes it look like a toggle switch
+                style={'marginBottom': '10px'}
+            ),
+        ]),
+
         html.Div([
             html.Img(
                 id='muscle-map-image',
@@ -26,6 +43,7 @@ def create_musclemap_layout():
             'margin': 'auto'
         }),
         dcc.Store(id='processed-strength-data-store'),
+        dcc.Store(id='muscle-view-type', data='map'),
     ])
 
 def create_spider_chart(processed_data, start_date, end_date):
