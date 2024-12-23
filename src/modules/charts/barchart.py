@@ -461,12 +461,36 @@ def create_data_loaded_div(first_day_last_month, last_day_last_month):
             dcc.Graph(id="summary-graph", style={'display': 'none'}),
         ]),
 
-        # Goals management section
+        # Goals management section with collapse functionality
         html.Div([
-            html.H3("Metric Goals", style={'marginTop': '20px'}),
-            html.Div(id='current-goals-display'),
-            html.Br(),
-            html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
+            html.Div([
+                html.H3("Metric Goals", style={'marginTop': '20px', 'display': 'inline-block'}),
+                html.Button(
+                    "⯆",  # Black down-pointing triangle (Unicode: U+2BC6)
+                    id='collapse-goals-button',
+                    n_clicks=0,
+                    style={
+                        'marginLeft': '10px',
+                        'background': 'none',
+                        'border': 'none',
+                        'fontSize': '20px',
+                        'cursor': 'pointer',
+                        'padding': '5px 10px',
+                        'verticalAlign': 'middle',
+                        'lineHeight': '1',
+                        'color': '#666'
+                    }
+                )
+            ], style={'display': 'flex', 'alignItems': 'center'}),
+            dbc.Collapse(
+                [
+                    html.Div(id='current-goals-display'),
+                    html.Br(),
+                    html.Button("Reset Goals to Default", id='reset-goals-button', n_clicks=0)
+                ],
+                id='goals-collapse',
+                is_open=True  # Initially expanded
+            )
         ]),
         dcc.Store(id='colorblind-mode', data=False)
     ], id='data-loaded-div', style={'display': 'none'})

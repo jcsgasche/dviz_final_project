@@ -4,6 +4,7 @@ import pandas as pd
 from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units, create_summary_chart, METRIC_LABEL_MAP, create_empty_chart
 import json
 import dash
+import dash_bootstrap_components as dbc
 
 def register_barchart_callbacks(app):
     @app.callback(
@@ -87,7 +88,7 @@ def register_barchart_callbacks(app):
          Input('stored-data', 'data'),
          Input('stored-goals', 'data'),
          Input('activity-graph', 'relayoutData'),
-         Input('colorblind-mode', 'data')],  # Add colorblind mode input
+         Input('colorblind-mode', 'data')],
         prevent_initial_call=True
     )
     def update_chart(selected_metric, start_date, end_date, stored_data, stored_goals,
@@ -122,7 +123,7 @@ def register_barchart_callbacks(app):
          Input('view-type', 'data'),
          Input('summary-type', 'value'),
          Input('summary-metrics-selector', 'value'),
-         Input('colorblind-mode', 'data')],  # Add colorblind mode input
+         Input('colorblind-mode', 'data')],
         prevent_initial_call=True
     )
     def update_summary_chart(start_date, end_date, stored_data, stored_goals,
@@ -160,7 +161,7 @@ def register_barchart_callbacks(app):
          Output('view-type', 'data'),
          Output('metric-selector-container', 'style'),
          Output('quick-goal-container', 'style'),
-         Output('summary-controls', 'style')],  # Added this output
+         Output('summary-controls', 'style')],
         [Input('toggle-summary-view', 'n_clicks')],
         [State('view-type', 'data')]
     )
@@ -171,7 +172,7 @@ def register_barchart_callbacks(app):
                     'detail',
                     {'width': '50%', 'marginBottom': '20px', 'display': 'block'},
                     {'display': 'block'},
-                    {'display': 'none'})  # Hide summary controls initially
+                    {'display': 'none'})
 
         if current_view == 'detail':
             return ({'display': 'none'},
@@ -179,14 +180,14 @@ def register_barchart_callbacks(app):
                     'summary',
                     {'width': '50%', 'marginBottom': '20px', 'display': 'none'},
                     {'display': 'none'},
-                    {'display': 'block'})  # Show summary controls
+                    {'display': 'block'})
         else:
             return ({'display': 'block'},
                     {'display': 'none'},
                     'detail',
                     {'width': '50%', 'marginBottom': '20px', 'display': 'block'},
                     {'display': 'block'},
-                    {'display': 'none'})  # Hide summary controls
+                    {'display': 'none'})
 
     @app.callback(
         Output('summary-metrics-dropdown', 'style'),
@@ -196,6 +197,17 @@ def register_barchart_callbacks(app):
         if summary_type == 'custom':
             return {'display': 'block'}
         return {'display': 'none'}
+
+    @app.callback(
+        [Output('goals-collapse', 'is_open'),
+         Output('collapse-goals-button', 'children')],
+        [Input('collapse-goals-button', 'n_clicks')],
+        [State('goals-collapse', 'is_open')]
+    )
+    def toggle_goals_collapse(n_clicks, is_open):
+        if n_clicks is None:
+            return True, '⯆'  # Initially expanded (Unicode: U+2BC6)
+        return not is_open, '⯆' if not is_open else '⯈'  # Toggle between down (U+2BC6) and right (U+2BC8) triangles
 
 def create_goals_display(goals):
     """Create a formatted display of all current goals with editable inputs"""
@@ -260,4 +272,3 @@ def create_goals_display(goals):
         'marginTop': '10px',
         'backgroundColor': 'white'
     })
-
