@@ -45,13 +45,21 @@ def create_spider_chart(ax, muscle_activity, position, size):
     angles += angles[:1]
 
     values = list(muscle_activity.values())
+    # Always normalize to percentage of maximum value
     max_value = max(values) if values and max(values) > 0 else 1
+    # Normalize values between 0 and 1
     values = [v / max_value if max_value != 0 else 0 for v in values]
+    # Close the polygon by appending the first value
     values += values[:1]
 
+    # Make sure we display all tick marks even with zero values
+    if all(v == 0 for v in values):
+        values = [0] * (len(values))
+
     ax_spider = plt.axes(position, projection='polar')
-    ax_spider.plot(angles, values, 'o-', linewidth=2)
-    ax_spider.fill(angles, values, alpha=0.25)
+    # Use fixed styling
+    ax_spider.plot(angles, values, 'o-', linewidth=2, color='blue')
+    ax_spider.fill(angles, values, alpha=0.25, color='blue')
 
     ax_spider.set_xticks(angles[:-1])
     labels = ax_spider.set_xticklabels(categories, size=14)
@@ -72,10 +80,21 @@ def create_spider_chart(ax, muscle_activity, position, size):
             label.set_rotation(angle)
             label.set_horizontalalignment('left')
 
+    # Set fixed tick marks at 20% intervals
+    yticks = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
     ax_spider.set_ylim(0, 1)
     ax_spider.set_facecolor('white')
     ax_spider.patch.set_alpha(0.8)
-    ax_spider.set_yticklabels([])
+    ax_spider.set_rticks(yticks)
+    yticklabels = [f'{int(y*100)}%' for y in yticks]
+    ax_spider.set_yticklabels(yticklabels, fontsize=12)
+
+    # Add gridlines
+    ax_spider.grid(True, color='gray', alpha=0.3)
+
+    # Make sure the ticks are always visible
+    for tick in ax_spider.yaxis.get_ticklabels():
+        tick.set_visible(True)
 
     return ax_spider
 
@@ -186,9 +205,21 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
     # Add legend
     add_legend(fig, ax_main)
 
+    # Initialize a complete muscle activity dictionary with zeros
+    complete_muscle_activity = {
+        'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
+        'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
+        'BackGlutes': 0, 'BackHamstrings': 0
+    }
+
+    # Update with any actual activity
+    for muscle, value in muscle_activity.items():
+        if muscle in complete_muscle_activity:
+            complete_muscle_activity[muscle] = value
+
     spider_chart = create_spider_chart(
         ax_main,
-        muscle_activity,
+        complete_muscle_activity,
         [0.71, 0.2, 0.4, 0.4],
         0.3
     )
@@ -249,15 +280,15 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
     # Add legend
     add_legend(fig, ax_main)
 
-    # Add empty spider chart
+    # Create empty spider chart with consistent axes
     empty_muscle_activity = {
-        'Chest': 0, 'Lats': 0, 'Delts': 0,
-        'Abs': 0, 'Triceps': 0, 'Biceps': 0,
-        'Quads': 0, 'Glutes': 0, 'Hamstrings': 0
+        'Front Chest': 0, 'Back Lats': 0, 'Front Deltoids': 0, 'Back Deltoids': 0,
+        'Front Abs': 0, 'Back Triceps': 0, 'Front Biceps': 0, 'Front Quads': 0,
+        'Back Glutes': 0, 'Back Hamstrings': 0
     }
     create_spider_chart(
         ax_main,
-        empty_muscle_activity,
+        empty_muscle_activity,  # Use the full set of muscles with zeros
         [0.75, 0.2, 0.3, 0.3],  # Moved left and increased size [left, bottom, width, height]
         0.3
     )

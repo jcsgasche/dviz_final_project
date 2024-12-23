@@ -3,8 +3,6 @@ from dash import html, dcc
 import plotly.graph_objects as go
 import json
 
-# modules/charts/musclemap/musclemap.py
-# Remove toggle button and spider chart container
 def create_musclemap_layout():
     return html.Div([
         html.H1("Muscle Activity Map"),
@@ -42,14 +40,7 @@ def create_spider_chart(processed_data, start_date, end_date):
         except json.JSONDecodeError:
             return create_empty_spider_chart("No data available<br>in this period of time")
 
-    # Initialize counters for muscle groups with full names
-    muscle_activity = {
-        'Front Chest': 0, 'Back Lats': 0, 'Front Deltoids': 0, 'Back Deltoids': 0,
-        'Front Abs': 0, 'Back Triceps': 0, 'Front Biceps': 0, 'Front Quads': 0,
-        'Back Glutes': 0, 'Back Hamstrings': 0
-    }
-
-    # Mapping of internal names to display names
+    # Constant mapping of muscles
     muscle_name_mapping = {
         'FrontChest': 'Front Chest',
         'BackLats': 'Back Lats',
@@ -61,6 +52,13 @@ def create_spider_chart(processed_data, start_date, end_date):
         'FrontQuads': 'Front Quads',
         'BackGlutes': 'Back Glutes',
         'BackHamstrings': 'Back Hamstrings'
+    }
+
+    # Initialize with fixed order and all muscles
+    muscle_activity = {
+        'Front Chest': 0, 'Back Lats': 0, 'Front Deltoids': 0, 'Back Deltoids': 0,
+        'Front Abs': 0, 'Back Triceps': 0, 'Front Biceps': 0, 'Front Quads': 0,
+        'Back Glutes': 0, 'Back Hamstrings': 0
     }
 
     # Process each activity
@@ -84,31 +82,34 @@ def create_spider_chart(processed_data, start_date, end_date):
                     if display_name in muscle_activity:
                         muscle_activity[display_name] += reps * 0.5
 
-    # Remove muscle groups with no activity
-    active_muscles = {k: v for k, v in muscle_activity.items() if v > 0}
-
-    if not active_muscles:
-        return create_empty_spider_chart("No data available<br>in this period of time")
-
     # Create the spider chart
     fig = go.Figure()
 
+    # Add trace with all muscles (including zeros)
     fig.add_trace(go.Scatterpolar(
-        r=list(active_muscles.values()),
-        theta=list(active_muscles.keys()),
+        r=list(muscle_activity.values()),
+        theta=list(muscle_activity.keys()),
         fill='toself',
         name='Muscle Activity'
     ))
 
+    # Set fixed tick marks and range
+    max_value = max(muscle_activity.values()) if any(muscle_activity.values()) else 1
+    tick_values = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    tick_text = [f"{int(v * 100)}%" for v in tick_values]
+
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
-                showticklabels=True,  # Show the numeric values
-                range=[0, max(active_muscles.values()) * 1.1]
+                visible=True,
+                showticklabels=True,
+                ticktext=tick_text,
+                tickvals=[v * max_value for v in tick_values],
+                range=[0, max_value * 1.1]
             ),
             angularaxis=dict(
-                showticklabels=True,  # Show the muscle labels
-                tickfont=dict(size=16)  # Adjust font size as needed
+                showticklabels=True,
+                tickfont=dict(size=16)
             )
         ),
         showlegend=True,
@@ -118,53 +119,59 @@ def create_spider_chart(processed_data, start_date, end_date):
     return fig
 
 def create_empty_spider_chart(message="Waiting for you to add<br>your personal fitness data"):
-    """Create an empty spider chart with default muscle groups and message, matching barchart style"""
+    """Create an empty spider chart with default muscle groups and message"""
     empty_muscles = {
-        'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
-        'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
-        'BackGlutes': 0, 'BackHamstrings': 0
+        'Front Chest': 0, 'Back Lats': 0, 'Front Deltoids': 0, 'Back Deltoids': 0,
+        'Front Abs': 0, 'Back Triceps': 0, 'Front Biceps': 0, 'Front Quads': 0,
+        'Back Glutes': 0, 'Back Hamstrings': 0
     }
 
     fig = go.Figure()
 
-    # Add the trace with explicit styling for every component
     fig.add_trace(go.Scatterpolar(
         r=list(empty_muscles.values()),
         theta=list(empty_muscles.keys()),
         fill='toself',
         name='Muscle Activity',
-        fillcolor='rgba(200, 200, 200, 0.2)',  # Background color matching barchart
+        fillcolor='rgba(200, 200, 200, 0.2)',
         line=dict(
-            color='rgba(150, 150, 150, 0.5)',  # Darker grey for lines
+            color='rgba(150, 150, 150, 0.5)',
             width=1
         ),
-        opacity=1,  # Ensure full opacity
+        opacity=1,
         showlegend=False
     ))
 
+    # Set fixed tick marks for empty chart
+    tick_values = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    tick_text = [f"{int(v * 100)}%" for v in tick_values]
+
     fig.update_layout(
         polar=dict(
-            bgcolor='rgba(200, 200, 200, 0.2)',  # Set polar background color
+            bgcolor='rgba(200, 200, 200, 0.2)',
             radialaxis=dict(
-                showticklabels=False,
+                visible=True,
+                showticklabels=True,
+                ticktext=tick_text,
+                tickvals=tick_values,
                 range=[0, 1],
                 linecolor='rgba(150, 150, 150, 0.5)',
                 gridcolor='rgba(150, 150, 150, 0.5)',
-                layer='below traces'  # Ensure grid is below the trace
+                layer='below traces'
             ),
             angularaxis=dict(
-                showticklabels=False,
+                showticklabels=True,
+                tickfont=dict(size=16),
                 linecolor='rgba(150, 150, 150, 0.5)',
                 gridcolor='rgba(150, 150, 150, 0.5)',
-                layer='below traces'  # Ensure grid is below the trace
+                layer='below traces'
             ),
-            domain=dict(x=[0, 1], y=[0, 1])  # Ensure proper sizing
+            domain=dict(x=[0, 1], y=[0, 1])
         ),
         showlegend=False,
         height=600,
         plot_bgcolor='white',
         paper_bgcolor='white',
-        # Add centered annotation matching barchart style
         annotations=[{
             'text': message,
             'x': 0.5,
