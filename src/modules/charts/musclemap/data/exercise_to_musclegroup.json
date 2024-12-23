@@ -116,5 +116,13 @@
         "secondary": [
             "Undefined"
         ]
+    },
+    "CARDIO": {
+        "primary": [
+            "Undefined"
+        ],
+        "secondary": [
+            "Undefined"
+        ]
     }
 }

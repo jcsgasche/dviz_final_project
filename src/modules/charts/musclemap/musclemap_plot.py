@@ -45,8 +45,8 @@ def create_spider_chart(ax, muscle_activity, position, size):
     angles += angles[:1]
 
     values = list(muscle_activity.values())
-    max_value = max(values) if values else 1
-    values = [v / max_value for v in values]
+    max_value = max(values) if values and max(values) > 0 else 1
+    values = [v / max_value if max_value != 0 else 0 for v in values]
     values += values[:1]
 
     ax_spider = plt.axes(position, projection='polar')
