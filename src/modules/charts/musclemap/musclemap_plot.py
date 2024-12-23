@@ -306,8 +306,15 @@ def create_spider_chart(ax, muscle_activity, position=SPIDER_CHART_POSITION, col
     ax_spider.set_ylim(0, 1)
     ax_spider.set_facecolor('white')
     ax_spider.patch.set_alpha(0.8)
+
+    # Set up the radial ticks and labels
     ax_spider.set_rticks(yticks)
     ax_spider.set_yticklabels([f'{int(y*100)}%' for y in yticks], fontsize=12)
+
+    # Adjust the position of the radial labels
+    ax_spider.set_rlabel_position(90)  # Position labels at 90 degrees
+    ax_spider.tick_params(axis='y', labelsize=12, pad=40)  # Increase padding
+
     ax_spider.grid(True, color='gray', alpha=0.3)
 
     for tick in ax_spider.yaxis.get_ticklabels():
