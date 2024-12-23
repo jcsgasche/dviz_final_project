@@ -3,6 +3,17 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 
+COLOR_SCHEMES = {
+    'default': [
+        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+    ],
+    'colorblind': [
+        '#225ea8', '#41b6c4', '#7fcdbb', '#c7e9b4', '#edf8b1',
+        '#253494', '#2c7fb8', '#41b6c4', '#a1dab4', '#ffffcc'
+    ]
+}
+
 # Activity type mapping for nicer labels
 ACTIVITY_TYPE_LABELS = {
     'strength_training': 'Strength Training',
@@ -93,7 +104,7 @@ def create_empty_donut_chart(message):
 
     return fig
 
-def create_activity_breakdown_chart(df, selected_metric):
+def create_activity_breakdown_chart(df, selected_metric, colorblind_mode=False):
     if df is None:
         return create_empty_donut_chart("Waiting for you to add<br>your personal fitness data")
 
@@ -125,9 +136,8 @@ def create_activity_breakdown_chart(df, selected_metric):
     # Remove activities with zero values
     breakdown = breakdown[breakdown > 0]
 
-    # Create color scale for consistent colors
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-              '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+    # Choose color scheme based on colorblind mode
+    colors = COLOR_SCHEMES['colorblind'] if colorblind_mode else COLOR_SCHEMES['default']
 
     fig = go.Figure(data=[go.Pie(
         labels=breakdown.index,
