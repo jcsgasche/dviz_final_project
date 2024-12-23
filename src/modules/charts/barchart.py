@@ -609,11 +609,10 @@ def create_activity_chart(df, selected_metric, start_date, end_date, goal_value,
         barmode='group',
         hovermode='closest',
         legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.3,
-            xanchor="center",
-            x=0.5
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.02
         )
     )
 
