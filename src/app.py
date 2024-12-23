@@ -1,5 +1,5 @@
 import base64
-from dash import Dash, html, dcc, Input, Output, State
+from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from pathlib import Path
 
@@ -123,7 +123,7 @@ app.layout = html.Div([
         dbc.Row([
             dbc.Col([
                 dbc.Card([
-                    dbc.CardBody(create_barchart_layout(first_day_last_month, last_day_last_month))
+                    dbc.CardBody(create_musclemap_layout())
                 ], className="mb-4 shadow")
             ])
         ]),
@@ -131,7 +131,7 @@ app.layout = html.Div([
         dbc.Row([
             dbc.Col([
                 dbc.Card([
-                    dbc.CardBody(create_musclemap_layout())
+                    dbc.CardBody(create_barchart_layout(first_day_last_month, last_day_last_month))
                 ], className="mb-4 shadow")
             ])
         ]),
