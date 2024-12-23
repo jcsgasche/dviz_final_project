@@ -15,8 +15,8 @@ from modules.callbacks.musclemap_callbacks import register_musclemap_callbacks
 THEME = dbc.themes.LUX
 
 app = Dash(__name__,
-        external_stylesheets=[THEME],
-        suppress_callback_exceptions=True)
+           external_stylesheets=[THEME],
+           suppress_callback_exceptions=True)
 
 first_day_last_month, last_day_last_month = calculate_date_range()
 
@@ -35,34 +35,10 @@ data_stores = html.Div([
     dcc.Store(id='stored-data', storage_type='local'),
     dcc.Store(id='strength-data-store', storage_type='local'),
     dcc.Store(id='last-update-time', storage_type='local'),
-    # Remove global-settings store since we're using the toggle directly
 ])
 
 floating_controls = dbc.Container([
-    # Date Range Card
-    dbc.Card([
-        dbc.CardBody([
-            html.H6("Date Range", className="mb-3"),
-            dcc.DatePickerRange(
-                id='date-range',
-                start_date=first_day_last_month.date(),
-                end_date=last_day_last_month.date(),
-                className="mb-2"
-            ),
-        ])
-    ], className="shadow-sm mb-3",
-        style={
-            'position': 'fixed',
-            'top': '80px',
-            'right': '20px',
-            'zIndex': 1000,
-            'width': 'auto',
-            'minWidth': '300px',
-            'backgroundColor': 'white',
-            'borderRadius': '4px'
-        }),
-
-    # Settings Card
+    # Settings Card (moved up)
     dbc.Card([
         dbc.CardBody([
             html.H6("Display Settings", className="mb-3"),
@@ -73,6 +49,29 @@ floating_controls = dbc.Container([
                 value=[],
                 id="global-colorblind-toggle",
                 switch=True,
+                className="mb-2"
+            ),
+        ])
+    ], className="shadow-sm mb-3",
+        style={
+            'position': 'fixed',
+            'top': '100px',
+            'right': '20px',
+            'zIndex': 1000,
+            'width': 'auto',
+            'minWidth': '300px',
+            'backgroundColor': 'white',
+            'borderRadius': '4px'
+        }),
+
+    # Date Range Card (moved down)
+    dbc.Card([
+        dbc.CardBody([
+            html.H6("Date Range", className="mb-3"),
+            dcc.DatePickerRange(
+                id='date-range',
+                start_date=first_day_last_month.date(),
+                end_date=last_day_last_month.date(),
                 className="mb-2"
             ),
         ])
@@ -110,7 +109,7 @@ app.layout = html.Div([
     navbar,
     data_stores,
     html.Div(id='data-status-container'),
-    floating_controls,  # Use the new floating controls instead of just date picker
+    floating_controls,
     dbc.Container([
         dbc.Row([
             dbc.Col([
