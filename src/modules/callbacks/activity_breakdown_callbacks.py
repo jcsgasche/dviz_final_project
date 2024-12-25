@@ -11,7 +11,6 @@ def register_activity_breakdown_callbacks(app):
          Input('global-colorblind-toggle', 'value')]  # Add colorblind toggle input
     )
     def update_activity_breakdown(selected_metric, start_date, end_date, stored_data, colorblind_mode):
-        # Convert colorblind_mode from list to boolean
         colorblind_enabled = bool(colorblind_mode and True in colorblind_mode)
 
         if not stored_data:
@@ -19,7 +18,6 @@ def register_activity_breakdown_callbacks(app):
             return create_activity_breakdown_chart(None, selected_metric, colorblind_enabled)
 
         try:
-            # Handle data whether it's a string or already a list
             if isinstance(stored_data, str):
                 df = pd.DataFrame(json.loads(stored_data))
             else:
@@ -27,7 +25,6 @@ def register_activity_breakdown_callbacks(app):
 
             df['startTimeLocal'] = pd.to_datetime(df['startTimeLocal'])
 
-            # Filter data for selected date range
             mask = (df['startTimeLocal'] >= start_date) & (df['startTimeLocal'] <= end_date)
             filtered_df = df.loc[mask]
 

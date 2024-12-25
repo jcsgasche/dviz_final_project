@@ -1,10 +1,7 @@
-# modules/callbacks/barchart_callbacks.py
 from dash import Input, Output, State, callback_context, html, dcc, ALL
 import pandas as pd
 from modules.charts.barchart import create_activity_chart, get_default_goals, get_metric_units, create_summary_chart, METRIC_LABEL_MAP, create_empty_chart
 import json
-import dash
-import dash_bootstrap_components as dbc
 
 def register_barchart_callbacks(app):
     @app.callback(
@@ -20,7 +17,6 @@ def register_barchart_callbacks(app):
     def update_goals(reset_clicks, goal_values, input_ids, selected_metric, stored_goals):
         ctx = callback_context
         if not ctx.triggered:
-            # Handle initial load
             updated_values = []
             for input_id in input_ids:
                 if input_id['metric'] == 'quick-set':
@@ -37,27 +33,21 @@ def register_barchart_callbacks(app):
             stored_goals = stored_goals or get_default_goals()
             trigger_dict = json.loads(trigger_id)
 
-            # Find which input triggered the callback
             trigger_index = next(i for i, id_dict in enumerate(input_ids) if id_dict == trigger_dict)
             new_value = goal_values[trigger_index]
 
             if new_value is not None:
                 metric = trigger_dict['metric']
                 if metric == 'quick-set':
-                    # Update the selected metric's goal when quick-set changes
                     stored_goals[selected_metric] = float(new_value)
                 else:
-                    # Update the specific metric's goal when table input changes
                     stored_goals[metric] = float(new_value)
 
-        # Update all input values
         updated_values = []
         for input_id in input_ids:
             if input_id['metric'] == 'quick-set':
-                # Quick-set always shows the selected metric's value
                 updated_values.append(stored_goals.get(selected_metric, get_default_goals()[selected_metric]))
             else:
-                # Table inputs show their respective metric values
                 updated_values.append(stored_goals.get(input_id['metric'], get_default_goals()[input_id['metric']]))
 
         return stored_goals, create_goals_display(stored_goals), updated_values
@@ -96,7 +86,6 @@ def register_barchart_callbacks(app):
         colorblind_enabled = bool(colorblind_mode and True in colorblind_mode)
 
         try:
-            # Handle data whether it's a string or already a list
             if isinstance(data, str):
                 df = pd.read_json(data)
             else:
@@ -125,7 +114,6 @@ def register_barchart_callbacks(app):
         colorblind_enabled = bool(colorblind_mode and True in colorblind_mode)
 
         try:
-            # Handle data whether it's a string or already a list
             if isinstance(data, str):
                 df = pd.DataFrame(json.loads(data))
             else:
@@ -199,18 +187,16 @@ def register_barchart_callbacks(app):
     )
     def toggle_goals_collapse(n_clicks, is_open):
         if n_clicks is None:
-            return True, '⯆'  # Initially expanded (Unicode: U+2BC6)
-        return not is_open, '⯆' if not is_open else '⯈'  # Toggle between down (U+2BC6) and right (U+2BC8) triangles
+            return True, '⯆'
+        return not is_open, '⯆' if not is_open else '⯈'
 
 def create_goals_display(goals):
     """Create a formatted display of all current goals with editable inputs"""
     if not goals:
         return html.Div("No goals set")
 
-    # Sort the metrics by their label rather than their key
     sorted_metrics = sorted(goals.keys(), key=lambda m: METRIC_LABEL_MAP.get(m, m))
 
-    # Create table header
     header = html.Tr([
         html.Th("Metric", style={'width': '40%', 'textAlign': 'left'}),
         html.Th("Goal", style={'width': '30%', 'textAlign': 'left'}),
@@ -221,7 +207,6 @@ def create_goals_display(goals):
     for metric in sorted_metrics:
         value = goals[metric]
         units = get_metric_units(metric)
-        # Use the same label as in the dropdown
         metric_label = METRIC_LABEL_MAP.get(metric, metric.replace('_', ' ').title())
 
         row = html.Tr([
@@ -244,7 +229,6 @@ def create_goals_display(goals):
 
         rows.append(row)
 
-    # Create table
     table = html.Table(
         [header] + rows,
         style={

@@ -23,7 +23,7 @@ def export_garmin_data(username: str, password: str) -> Tuple[str, str]:
         # Fetch and save general activities
         activities = api.get_activities(0, 30)
         activities_df = pd.DataFrame(activities)
-        activities_file = 'garmin_activities.json'
+        activities_file = '../garmin_activities.json'
         activities_df.to_json(activities_file, orient='records', indent=4)
 
         # Fetch strength training activities
@@ -46,7 +46,7 @@ def export_garmin_data(username: str, password: str) -> Tuple[str, str]:
             start += limit
 
         # Save strength training activities
-        strength_file = 'garmin_strength_activities.json'
+        strength_file = '../garmin_strength_activities.json'
         with open(strength_file, 'w') as f:
             json.dump(strength_activities, f, indent=4)
 

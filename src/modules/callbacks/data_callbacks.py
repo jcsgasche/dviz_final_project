@@ -1,15 +1,12 @@
-# modules/callbacks/data_callbacks.py
 import dash
 from dash import Input, Output, State, html
 import pandas as pd
 import json
 import base64
-import io
 from datetime import datetime
 from garminconnect import Garmin
 
 def register_data_callbacks(app):
-    # Combined UI elements callback
     @app.callback(
         [Output('download-section', 'style', allow_duplicate=True),
          Output('clear-data-section', 'style', allow_duplicate=True),
@@ -24,14 +21,11 @@ def register_data_callbacks(app):
         prevent_initial_call=True
     )
     def update_all_ui_elements(ts, last_update, data_source, stored_data):
-        # Base styles for sections that depend on stored data
         display_style = {'marginTop': '20px', 'display': 'block'} if stored_data else {'display': 'none'}
 
-        # Data source specific styles
         garmin_style = {'display': 'block'} if data_source == 'garmin' else {'display': 'none'}
         file_style = {'display': 'block'} if data_source != 'garmin' else {'display': 'none'}
 
-        # Common message style
         message_style = {
             'fontWeight': '500',
             'padding': '10px',
@@ -40,7 +34,6 @@ def register_data_callbacks(app):
             'width': '100%'
         }
 
-        # Status messages with consistent styling
         last_update_text = f"Last updated: {last_update}" if last_update else ""
 
         if stored_data:
@@ -59,12 +52,12 @@ def register_data_callbacks(app):
                                       })
 
         return (
-            display_style,           # download section style
-            display_style,           # clear data section style
-            last_update_text,        # last update display
-            status_message,          # data status container
-            garmin_style,           # garmin login style
-            file_style              # file upload style
+            display_style,
+            display_style,
+            last_update_text,
+            status_message,
+            garmin_style,
+            file_style
         )
 
     @app.callback(
@@ -88,11 +81,9 @@ def register_data_callbacks(app):
 
         trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-        # Handle clear data button
         if trigger_id == 'clear-data-button' and clear_clicks:
             return None, None, None, None
 
-        # Handle file upload
         if trigger_id == 'upload-data' and upload_contents:
             try:
                 content_type, content_string = upload_contents.split(',')
@@ -117,7 +108,7 @@ def register_data_callbacks(app):
                         activities_df.to_dict('records'),
                         json.dumps(strength_activities),
                         current_time,
-                        None  # Reset upload contents
+                        None
                     )
                 else:
                     return None, None, None, None
@@ -126,7 +117,6 @@ def register_data_callbacks(app):
                 print(f"Error processing file: {str(e)}")
                 return None, None, None, None
 
-        # Handle Garmin fetch
         if trigger_id == 'fetch-button' and n_clicks:
             if not username or not password:
                 return None, None, None, dash.no_update

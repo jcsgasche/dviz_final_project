@@ -1,10 +1,5 @@
-# modules/charts/barchart.py
-from dash import dcc, html, Input, Output, State
 import plotly.graph_objects as go
-import pandas as pd
-import dash
-import json
-from dash import dcc, html, Input, Output, State, ALL
+from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 COLOR_SCHEMES = {
@@ -55,23 +50,19 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
     """Create a summary chart showing metrics' performance as percentage of their goals"""
     summary_data = {}
 
-    # Determine which metrics to display
     metrics_to_show = selected_metrics if selected_metrics else [opt['value'] for opt in METRIC_OPTIONS]
 
-    # Calculate mean for each metric in the period and convert to percentage of goal
     for metric in metrics_to_show:
         if metric in df.columns:
-            # Apply any necessary conversions
             values = df[metric]
             if metric == 'duration':
-                values = values / 60  # Convert to minutes
+                values = values / 60
             elif metric == 'distance':
-                values = values / 1000  # Convert to kilometers
+                values = values / 1000
 
             mean_value = values.mean()
             goal_value = stored_goals.get(metric, get_default_goals()[metric])
 
-            # Calculate percentage of goal reached
             percentage = (mean_value / goal_value * 100) if goal_value != 0 else 0
 
             summary_data[metric] = {
@@ -82,10 +73,8 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
                 'almost_reached': 75 <= percentage < 100
             }
 
-    # Create the summary bar chart
     fig = go.Figure()
 
-    # Prepare data for plotting
     metrics = []
     percentages_reached = []
     percentages_almost_reached = []
@@ -115,7 +104,6 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
             percentages_almost_reached.append(None)
             percentages_not_reached.append(percentage)
 
-        # Create detailed hover text
         units = get_metric_units(metric)
         hover_texts.append(
             f"Metric: {metric_label}<br>" +
@@ -126,7 +114,6 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
 
     colors = COLOR_SCHEMES['colorblind'] if colorblind_mode else COLOR_SCHEMES['default']
 
-    # Add bars for goals reached
     fig.add_trace(go.Bar(
         x=metrics,
         y=percentages_reached,
@@ -138,7 +125,6 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         hoverinfo='text'
     ))
 
-    # Add bars for goals almost reached
     fig.add_trace(go.Bar(
         x=metrics,
         y=percentages_almost_reached,
@@ -150,7 +136,6 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         hoverinfo='text'
     ))
 
-    # Add bars for goals not reached
     fig.add_trace(go.Bar(
         x=metrics,
         y=percentages_not_reached,
@@ -162,7 +147,6 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         hoverinfo='text'
     ))
 
-    # Update goal lines with appropriate colors
     fig.add_shape(
         type="line",
         x0=0,
@@ -193,7 +177,6 @@ def create_summary_chart(df, start_date, end_date, stored_goals, selected_metric
         yref="y"
     )
 
-    # Update legend lines
     fig.add_trace(go.Scatter(
         x=[None],
         y=[None],
@@ -245,10 +228,8 @@ METRIC_OPTIONS = [
     {'label': 'Water Loss (ml)', 'value': 'waterEstimated'},
 ]
 
-# Sort METRIC_OPTIONS by label
 METRIC_OPTIONS = sorted(METRIC_OPTIONS, key=lambda x: x['label'])
 
-# Create a dictionary for easy lookup of labels by metric value
 METRIC_LABEL_MAP = {opt['value']: opt['label'] for opt in METRIC_OPTIONS}
 
 def create_metric_controls(first_day_last_month, last_day_last_month):
@@ -257,7 +238,7 @@ def create_metric_controls(first_day_last_month, last_day_last_month):
             html.Label("Select Metric:"),
             dcc.Dropdown(
                 id='metric-selector',
-                options=METRIC_OPTIONS,  # Use the sorted list here
+                options=METRIC_OPTIONS,
                 value='calories'
             )
         ], style={'width': '50%', 'marginBottom': '20px'}),
@@ -283,21 +264,18 @@ def create_empty_chart(message):
     """Create an empty chart with a centered message and greyed out background bars"""
     fig = go.Figure()
 
-    # Create background bar chart data
     background_x = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     background_y = [30, 45, 25, 60, 40, 35, 50]
 
-    # Add grey background bars
     fig.add_trace(go.Bar(
         x=background_x,
         y=background_y,
-        marker_color='rgba(200, 200, 200, 0.2)',  # Very light grey
-        marker_line=dict(color='rgba(150, 150, 150, 0.5)', width=1),  # Add this line
+        marker_color='rgba(200, 200, 200, 0.2)',
+        marker_line=dict(color='rgba(150, 150, 150, 0.5)', width=1),
         showlegend=False,
         hoverinfo='skip'
     ))
 
-    # Add centered message
     fig.add_annotation(
         text=message,
         x=0.5,
@@ -309,10 +287,9 @@ def create_empty_chart(message):
         xanchor='center',
         yanchor='middle',
         align='center',
-        bgcolor='rgba(255, 255, 255, 0.9)'  # Semi-transparent white background
+        bgcolor='rgba(255, 255, 255, 0.9)'
     )
 
-    # Update layout
     fig.update_layout(
         showlegend=False,
         height=600,
@@ -321,16 +298,15 @@ def create_empty_chart(message):
         margin=dict(t=80, l=20, r=20, b=20),
         font=dict(family="Arial, sans-serif"),
         xaxis=dict(
-            showticklabels=False,  # Hide x-axis labels
+            showticklabels=False,
             showgrid=False,
             zeroline=False
         ),
         yaxis=dict(
-            showticklabels=False,  # Hide y-axis labels
+            showticklabels=False,
             showgrid=False,
             zeroline=False
         ),
-        # Ensure the bars are behind the message
         annotations=[{
             'text': message,
             'x': 0.5,
@@ -364,10 +340,8 @@ def create_initial_loading_div():
         )
     ], id='initial-loading-div')
 
-# Add this function after create_metric_controls:
 def create_summary_controls():
     return html.Div([
-        # Toggle between full/custom summary
         html.Div([
             dbc.RadioItems(
                 id='summary-type',
@@ -381,7 +355,6 @@ def create_summary_controls():
             ),
         ]),
 
-        # Dropdown for selecting metrics (initially hidden)
         html.Div([
             dcc.Dropdown(
                 id='summary-metrics-selector',

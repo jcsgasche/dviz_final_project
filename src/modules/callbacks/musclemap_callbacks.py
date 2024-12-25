@@ -1,10 +1,8 @@
-# modules/callbacks/musclemap_callbacks.py
 from dash import Input, Output, State
 import json
 import datetime
 import os
 from modules.charts.musclemap import musclemap_load, musclemap_plot
-from modules.charts.musclemap.musclemap import create_spider_chart, create_empty_spider_chart
 
 def register_musclemap_callbacks(app):
     @app.callback(
@@ -14,11 +12,10 @@ def register_musclemap_callbacks(app):
          Input('date-range', 'start_date'),
          Input('date-range', 'end_date'),
          Input('stored-data', 'modified_timestamp'),
-         Input('global-colorblind-toggle', 'value')],  # Changed to correct ID
+         Input('global-colorblind-toggle', 'value')],
         [State('stored-data', 'data')]
     )
     def update_muscle_visualizations(raw_data, start_date, end_date, ts, colorblind_mode, stored_data):
-        # Convert colorblind_mode from list to boolean
         colorblind_enabled = bool(colorblind_mode and True in colorblind_mode)
 
         if not raw_data:

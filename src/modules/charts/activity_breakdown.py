@@ -1,7 +1,5 @@
 from dash import html, dcc
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import pandas as pd
 
 COLOR_SCHEMES = {
     'default': [
@@ -14,7 +12,6 @@ COLOR_SCHEMES = {
     ]
 }
 
-# Activity type mapping for nicer labels
 ACTIVITY_TYPE_LABELS = {
     'strength_training': 'Strength Training',
     'trail_running': 'Trail Running',
@@ -70,8 +67,8 @@ def create_empty_donut_chart(message):
         hole=0.5,
         textinfo='none',
         marker=dict(
-            colors=['rgba(200, 200, 200, 0.2)'],  # Match the light grey from other charts
-            line=dict(color='rgba(150, 150, 150, 0.5)', width=1)  # Add this line
+            colors=['rgba(200, 200, 200, 0.2)'],
+            line=dict(color='rgba(150, 150, 150, 0.5)', width=1)
         ),
         hoverinfo='none',
         showlegend=False
@@ -84,7 +81,6 @@ def create_empty_donut_chart(message):
         paper_bgcolor='white',
         margin=dict(t=80, l=20, r=20, b=20),
         font=dict(family="Arial, sans-serif"),
-        # Add centered annotation matching other charts
         annotations=[{
             'text': message,
             'x': 0.5,
@@ -123,9 +119,9 @@ def create_activity_breakdown_chart(df, selected_metric, colorblind_mode=False):
         hover_template = "Activity: %{label}<br>Count: %{value}<br>Percentage: %{percent}"
     else:
         if selected_metric == 'distance':
-            df[selected_metric] = df[selected_metric] / 1000  # Convert to km
+            df[selected_metric] = df[selected_metric] / 1000
         elif selected_metric == 'duration':
-            df[selected_metric] = df[selected_metric] / 60  # Convert to minutes
+            df[selected_metric] = df[selected_metric] / 60
 
         breakdown = df.groupby('activity_type_label')[selected_metric].sum()
         total = breakdown.sum()
@@ -133,10 +129,8 @@ def create_activity_breakdown_chart(df, selected_metric, colorblind_mode=False):
                           f"{metric_config['label']}: %{{value:{metric_config['format']}}} {metric_config['unit']}"
                           f"<br>Percentage: %{{percent}}")
 
-    # Remove activities with zero values
     breakdown = breakdown[breakdown > 0]
 
-    # Choose color scheme based on colorblind mode
     colors = COLOR_SCHEMES['colorblind'] if colorblind_mode else COLOR_SCHEMES['default']
 
     fig = go.Figure(data=[go.Pie(

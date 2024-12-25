@@ -1,6 +1,5 @@
 import matplotlib
 matplotlib.use('Agg')
-
 import os
 import sys
 import json
@@ -12,7 +11,6 @@ import base64
 import numpy as np
 import matplotlib.colors as mcolors
 
-# Define color schemes
 COLOR_SCHEMES = {
     'default': {
         'primary': {'base': (1, 0, 0), 'alpha_range': (0.2, 1.0)},  # Red with alpha
@@ -26,7 +24,6 @@ COLOR_SCHEMES = {
     }
 }
 
-# Constants for consistent sizing
 FIGURE_SIZE = (27, 15)
 MAIN_AXES_POSITION = [0.1, 0.1, 0.8, 0.8]
 SPIDER_CHART_POSITION = [0.71, 0.2, 0.4, 0.4]
@@ -39,7 +36,7 @@ def get_color_with_intensity(color_spec, intensity):
 
     if isinstance(base_color, tuple):
         r, g, b = base_color
-    else:  # hex color
+    else:
         rgb = mcolors.to_rgb(base_color)
         r, g, b = rgb
 
@@ -72,7 +69,6 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
                                        message="No data available\nin this period of time",
                                        colorblind_mode=colorblind_mode)
 
-    # Calculate muscle activity
     primary_reps = {}
     secondary_reps = {}
     muscle_activity = {}
@@ -93,7 +89,6 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
                     base_muscle = muscle.replace('Right', '').replace('Left', '')
                     muscle_activity[base_muscle] = muscle_activity.get(base_muscle, 0) + reps * 0.5
 
-    # Create figure with consistent size
     fig = plt.figure(figsize=FIGURE_SIZE)
     ax_main = plt.axes(MAIN_AXES_POSITION)
 
@@ -104,10 +99,8 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
     ax_main.set_aspect('equal')
     ax_main.axis('off')
 
-    # Get color scheme
     color_scheme = COLOR_SCHEMES['colorblind'] if colorblind_mode else COLOR_SCHEMES['default']
 
-    # Draw muscle map
     max_primary_reps = max(primary_reps.values(), default=1)
     max_secondary_reps = max(secondary_reps.values(), default=1)
 
@@ -130,21 +123,18 @@ def plot_muscle_map(processed_strength_activities, muscle_coordinates, zoom_out_
 
     add_legend(fig, ax_main, colorblind_mode)
 
-    # Initialize complete muscle activity dictionary
     complete_muscle_activity = {
         'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
         'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
         'BackGlutes': 0, 'BackHamstrings': 0
     }
 
-    # Update with actual activity
     for muscle, value in muscle_activity.items():
         if muscle in complete_muscle_activity:
             complete_muscle_activity[muscle] = value
 
     create_spider_chart(ax_main, complete_muscle_activity, colorblind_mode=colorblind_mode)
 
-    # Save with consistent quality
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight', dpi=200)
     plt.close(fig)
@@ -163,10 +153,8 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
     ax_main.set_aspect('equal')
     ax_main.axis('off')
 
-    # Get color scheme
     color_scheme = COLOR_SCHEMES['colorblind'] if colorblind_mode else COLOR_SCHEMES['default']
 
-    # Draw muscles in inactive color
     for muscle_group, polygons in muscle_coordinates.items():
         for polygon_data in polygons:
             coords = polygon_data["coords"]
@@ -177,7 +165,6 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
                               edgecolor="black", linewidth=0.5)
             ax_main.add_patch(polygon)
 
-    # Add centered message
     center_x = (xlim[0] + xlim[1]) / 2
     center_y = (ylim[0] + ylim[1]) / 2
 
@@ -198,7 +185,6 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
 
     add_legend(fig, ax_main, colorblind_mode)
 
-    # Create empty spider chart with same positioning as filled version
     empty_muscle_activity = {
         'FrontChest': 0, 'BackLats': 0, 'FrontDelts': 0, 'BackDelts': 0,
         'FrontAbs': 0, 'BackTriceps': 0, 'FrontBiceps': 0, 'FrontQuads': 0,
@@ -206,7 +192,6 @@ def create_empty_muscle_map(muscle_coordinates, zoom_out_factor=1.5, message="Wa
     }
     create_spider_chart(ax_main, empty_muscle_activity, colorblind_mode=colorblind_mode)
 
-    # Save with consistent quality
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight', dpi=200)
     plt.close(fig)
@@ -237,7 +222,6 @@ def add_legend(fig, ax, colorblind_mode=False):
     legend_ax.spines["top"].set_visible(True)
     legend_ax.spines["bottom"].set_visible(True)
 
-    # Primary muscles legend
     legend_ax.text(-0.15, 1.3, "Primary Trained Muscles", ha='right', va='center', fontsize=16)
     for i in range(5):
         intensity = 1.0 - 0.25 * i
@@ -246,7 +230,6 @@ def add_legend(fig, ax, colorblind_mode=False):
         rect = plt.Rectangle((xstart, 1.1), 0.2, 0.4, facecolor=color)
         legend_ax.add_patch(rect)
 
-    # Secondary muscles legend
     legend_ax.text(-0.15, 0.1, "Secondary Trained Muscles", ha='right', va='center', fontsize=16)
     for i in range(5):
         intensity = 1.0 - 0.25 * i
@@ -286,7 +269,6 @@ def create_spider_chart(ax, muscle_activity, position=SPIDER_CHART_POSITION, col
     labels = ax_spider.set_xticklabels(categories, size=14)
     ax_spider.set_rlabel_position(0)
 
-    # Label rotation logic
     for idx, label in enumerate(labels):
         angle = angles[idx] * 180/np.pi
         if angle < 90:
@@ -307,13 +289,11 @@ def create_spider_chart(ax, muscle_activity, position=SPIDER_CHART_POSITION, col
     ax_spider.set_facecolor('white')
     ax_spider.patch.set_alpha(0.8)
 
-    # Set up the radial ticks and labels
     ax_spider.set_rticks(yticks)
     ax_spider.set_yticklabels([f'{int(y*100)}%' for y in yticks], fontsize=12)
 
-    # Adjust the position of the radial labels
-    ax_spider.set_rlabel_position(90)  # Position labels at 90 degrees
-    ax_spider.tick_params(axis='y', labelsize=12, pad=40)  # Increase padding
+    ax_spider.set_rlabel_position(90)
+    ax_spider.tick_params(axis='y', labelsize=12, pad=40)
 
     ax_spider.grid(True, color='gray', alpha=0.3)
 

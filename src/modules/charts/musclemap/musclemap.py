@@ -1,18 +1,10 @@
-# modules/charts/musclemap/musclemap.py
 from dash import html, dcc
-import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import json
-
-# Updated musclemap.py
-
-# Updated musclemap.py
 
 def create_musclemap_layout():
     return html.Div([
         html.H1("Muscle Activity Map"),
-
-        # Remove colorblind toggle since it's now global
 
         html.Div([
             html.Img(
@@ -42,7 +34,6 @@ def create_spider_chart(processed_data, start_date, end_date):
     if not processed_data:
         return create_empty_spider_chart()
 
-    # Parse the JSON string if it's not already a list
     if isinstance(processed_data, str):
         try:
             processed_data = json.loads(processed_data)
@@ -63,19 +54,16 @@ def create_spider_chart(processed_data, start_date, end_date):
         'BackHamstrings': 'Back Hamstrings'
     }
 
-    # Initialize with fixed order and all muscles
     muscle_activity = {
         'Front Chest': 0, 'Back Lats': 0, 'Front Deltoids': 0, 'Back Deltoids': 0,
         'Front Abs': 0, 'Back Triceps': 0, 'Front Biceps': 0, 'Front Quads': 0,
         'Back Glutes': 0, 'Back Hamstrings': 0
     }
 
-    # Process each activity
     for activity in processed_data:
         for exercise in activity['exercises']:
             reps = exercise.get('repetitions', 0) * exercise.get('sets', 1)
 
-            # Process primary muscles
             for muscle in exercise['primary_muscles']:
                 if muscle != 'Undefined':
                     base_muscle = muscle.replace('Right', '').replace('Left', '')
@@ -83,7 +71,6 @@ def create_spider_chart(processed_data, start_date, end_date):
                     if display_name in muscle_activity:
                         muscle_activity[display_name] += reps * 1.0
 
-            # Process secondary muscles
             for muscle in exercise['secondary_muscles']:
                 if muscle != 'Undefined':
                     base_muscle = muscle.replace('Right', '').replace('Left', '')
@@ -91,10 +78,8 @@ def create_spider_chart(processed_data, start_date, end_date):
                     if display_name in muscle_activity:
                         muscle_activity[display_name] += reps * 0.5
 
-    # Create the spider chart
     fig = go.Figure()
 
-    # Add trace with all muscles (including zeros)
     fig.add_trace(go.Scatterpolar(
         r=list(muscle_activity.values()),
         theta=list(muscle_activity.keys()),
@@ -102,7 +87,6 @@ def create_spider_chart(processed_data, start_date, end_date):
         name='Muscle Activity'
     ))
 
-    # Set fixed tick marks and range
     max_value = max(muscle_activity.values()) if any(muscle_activity.values()) else 1
     tick_values = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
     tick_text = [f"{int(v * 100)}%" for v in tick_values]
@@ -151,7 +135,6 @@ def create_empty_spider_chart(message="Waiting for you to add<br>your personal f
         showlegend=False
     ))
 
-    # Set fixed tick marks for empty chart
     tick_values = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
     tick_text = [f"{int(v * 100)}%" for v in tick_values]
 

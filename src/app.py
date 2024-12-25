@@ -20,17 +20,15 @@ app = Dash(__name__,
 
 first_day_last_month, last_day_last_month = calculate_date_range()
 
-# Logo file
 logo_path = Path(__file__).parent / 'modules' / 'charts' / 'musclemap' / 'data' / 'LOGO.png'
 with open(logo_path, 'rb') as f:
     encoded_logo = base64.b64encode(f.read()).decode()
 
 logo_image = html.Img(
     src=f'data:image/png;base64,{encoded_logo}',
-    style={'height': '90px', 'marginLeft': '40px'}  # Adjust as needed
+    style={'height': '90px', 'marginLeft': '40px'}
 )
 
-# Data stores container
 data_stores = html.Div([
     dcc.Store(id='stored-data', storage_type='local'),
     dcc.Store(id='strength-data-store', storage_type='local'),
@@ -38,7 +36,6 @@ data_stores = html.Div([
 ])
 
 floating_controls = dbc.Container([
-    # Settings Card (moved up)
     dbc.Card([
         dbc.CardBody([
             html.H6("Display Settings", className="mb-3"),
@@ -145,7 +142,6 @@ app.layout = html.Div([
     ], fluid=True, className="py-4")
 ], style={'backgroundColor': '#f8f9fa', 'minHeight': '100vh'})
 
-# Register all callbacks
 register_data_callbacks(app)
 register_barchart_callbacks(app)
 register_activity_breakdown_callbacks(app)
