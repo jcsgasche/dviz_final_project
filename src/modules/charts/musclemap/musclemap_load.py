@@ -66,8 +66,8 @@ exercise_to_musclegroup = {
 }
 
 def load_exercise_mappings():
-    if os.path.exists("modules/charts/musclemap/data/exercise_to_musclegroup.json"):
-        with open("modules/charts/musclemap/data/exercise_to_musclegroup.json", "r") as f:
+    if os.path.exists("src/modules/charts/musclemap/data/exercise_to_musclegroup.json"):
+        with open("src/modules/charts/musclemap/data/exercise_to_musclegroup.json", "r") as f:
             loaded = json.load(f)
         exercise_to_musclegroup.update(loaded)
         # Update known_exercises
@@ -76,7 +76,7 @@ def load_exercise_mappings():
     return known_exercises
 
 def save_exercise_mappings():
-    with open("modules/charts/musclemap/data/exercise_to_musclegroup.json", "w") as f:
+    with open("src/modules/charts/musclemap/data/exercise_to_musclegroup.json", "w") as f:
         json.dump(exercise_to_musclegroup, f, indent=4)
 
 def process_strength_activities(strength_activities):
@@ -130,7 +130,7 @@ def process_strength_activities(strength_activities):
             "exercises": activity_exercises,
         })
 
-    with open("modules/charts/musclemap/data/processed_strength_activities.json", "w") as f:
+    with open("src/modules/charts/musclemap/data/processed_strength_activities.json", "w") as f:
         json.dump(processed_data, f, indent=4)
 
     save_exercise_mappings()
