@@ -20,7 +20,7 @@ app = Dash(__name__,
 
 first_day_last_month, last_day_last_month = calculate_date_range()
 
-logo_path = Path(__file__).parent / 'modules' / 'charts' / 'musclemap' / 'data' / 'LOGO.png'
+logo_path = 'data/LOGO.png'
 with open(logo_path, 'rb') as f:
     encoded_logo = base64.b64encode(f.read()).decode()
 
