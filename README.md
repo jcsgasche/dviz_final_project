@@ -1,57 +1,88 @@
 # PFIFA! (Personal Functional Interactive Fitness Analysis)
 
-# About
-This is an interactive fitness dashboard which displays your personal progress to your needs.
-The data is gathered through garmin fitness watches and is displayed with plotly and dash.
+## About
+PFIFA is an interactive fitness dashboard designed to display your personal progress tailored to your fitness goals. The data is gathered through Garmin fitness watches and visualized using Plotly and Dash, offering a dynamic and engaging user experience.
 
-# Setup / Requirements
-## Python Installation
-To run this dashboard you need a running python installation on your OS. You can get python here: https://www.python.org/downloads/
-## Python environment
-We strongly encourage you to use a virtual environment for this app to keep dependencies seperate from any other project. Here's a guide on virtual environments: https://realpython.com/python-virtual-environments-a-primer/
-## Python Packages
-Please install the python packages from the requirements so that you can run the app. To do so, just run this command in the project root:
+---
+
+## Setup and Requirements
+
+### Python Installation
+To run this dashboard, you need a functioning Python installation on your operating system. You can download Python here: [Python Downloads](https://www.python.org/downloads/).
+
+### Python Environment
+We strongly recommend using a virtual environment to keep dependencies isolated from other projects. For guidance, refer to this primer on virtual environments: [Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/).
+
+### Python Packages
+Ensure the required Python packages are installed. Run the following command from the project root:
 ```bash
-pip install -r ./requirements
+pip install -r requirements.txt
 ```
 
-# Running The App
-Once everything is set up and the dependencies are resolved, you can run the app by just running `app.py` with python.
-E.g. you can run this in project root, ideally in a dedicated python environment:
+---
+
+## Running the App
+Once the setup is complete and all dependencies are installed, you can launch the app by running the `app.py` file with Python. Use the following command in the project root, preferably within the virtual environment:
 ```bash
-python3 ./src/app.py
+python3 src/app.py
 ```
-Please run `app.py` from the project root (like in the snippet), for the paths to be correctly selected.
+Ensure the script is executed from the project root to maintain correct path references.
 
-# App Usage
-The app consists of four sections: "Load Data" and the three Visualisations "Muscle Activity Map", "Goal/Reached Dashboard" and "Activity Type Breakdown".
-## Load Data
-### Fetch from Garmin
-You can load your personal fitness data through the Garmin API using your garmin account. Just enter your login credentials and fetch data straight through the API. 
-Since the API usage is limited to regulate Garmin API traffic, therefore the data stays consistently on the page. 
-You can download your data through the download button. This can be helpful for future cases if you want to use data on other devices when the API is not reachable or if you want to minimize API usage.
-### Upload Local Dataset
-In the "Upload Local Dataset" section you upload data you have previously downloaded from the fetching section.
-## Toggle Colorblind Mode
-For colorblind people to have a clear coloring scheme, there is a floating window with a toggle button to switch to colorblind friendly mode. We think the coloring is less intuitive since there are not all the colors available, but it is clearly distinguishable and the best solution for colorblind people.
-## Set Time Range
-Below the window with the Colorblind Switch, there is a window to set the time range. You can set any time range and the visualisations will update dynamically. If there is no data available in this period of time, it will be displayed in text in the visualisation.
+---
 
-# Visualisations
-## Muscle Activity Map
-This visualisation consist of two parts: a muscle map and a spider chart.
-### Muscle Map
-The Muscle Map shows how much you trained your primary and secondary muscles. Primary muscles are colored red (or blue for colorblind) and secondary muscles are colored yellow (or turquoise
-for colorblind). For both primary and secondary muscles, the opacity of coloring shows how much a specific muscle group has been trained, where higher opacity stands for more training.
-### Spider Chart
-The Spider Chart is an additional visualisation next to the muscle map to complement it. It shows the balance of your training in a different way, as a spider chart. It allows you to analyze the balance of your strength training more directly.
-## Goal/Reached Dashboard
-The Goal/Reached Dashboard allows you to set goals for all kinds of metrics measure by your Garmin watch. There are two views: Summary View and Single Metric View, and a table to set goals for each metric.
-### Summary View
-In the Summary View you can see a comparison of your metrics summarized in a single bar each. You can either show all the metric or just show a selected view using the Custom Selection button.
-### Single Metric View
-The Single Metric View allows you to look at a single metric over time. It shows you each single training in the selected period of time and if they have individually reached the goal. You can set your goal for the single metric in this section.
-### Metric Selection Table
-To use the Metric Selection Table, you need to unfold it. You can set the goals for you metrics there (this also affects the single metrics goals).
-## Activity Type Breakdown
-In the Activity Type Breakdown you can see how your different types of training are balanced in a pie chart. You can set different metrics of measurements like duration or activities.
+## App Usage
+The app features four primary sections: **Load Data**, and three visualizations: **Muscle Activity Map**, **Goal/Reached Dashboard**, and **Activity Type Breakdown**.
+
+### Load Data
+#### Fetch from Garmin
+- Use your Garmin account credentials to fetch fitness data via the Garmin API.
+- Due to API traffic regulation, data fetched will persist within the app.
+- You can download your data for offline use or to minimize API usage on other devices.
+
+#### Upload Local Dataset
+- Upload previously downloaded datasets via the "Upload Local Dataset" section.
+
+### Toggle Colorblind Mode
+- A floating toggle button enables a colorblind-friendly mode for better accessibility.
+- Although the coloring scheme in this mode may appear less intuitive, it ensures clear distinction for users with colorblindness.
+
+### Set Time Range
+- Use the time range selector to adjust the period for visualizations. If no data is available for the selected range, a message will appear within the visualization.
+
+---
+
+## Visualizations
+
+### Muscle Activity Map
+#### Muscle Map
+- Displays trained muscle groups with color-coded intensity:
+    - Primary muscles: **Red** (or **Blue** in colorblind mode).
+    - Secondary muscles: **Yellow** (or **Turquoise** in colorblind mode).
+- Opacity indicates training intensity, with higher opacity representing more training.
+
+#### Spider Chart
+- Complements the Muscle Map by visualizing training balance as a spider chart.
+- Helps analyze the balance of your strength training in a direct, graphical manner.
+
+### Goal/Reached Dashboard
+Allows you to set and track goals for various metrics measured by your Garmin watch.
+
+#### Summary View
+- Compares metrics in a summarized bar chart.
+- Toggle between all metrics or a customized selection.
+
+#### Single Metric View
+- Focus on a single metric over time.
+- Displays individual training sessions within the selected period and indicates whether goals were met.
+- Set individual metric goals directly within this view.
+
+#### Metric Selection Table
+- Use the unfoldable table to set goals for various metrics, affecting both summary and single metric goals.
+
+### Activity Type Breakdown
+- Displays a pie chart of your training types.
+- Customize the metrics displayed (e.g., duration, number of activities).
+
+---
+
+PFIFA combines functionality and interactivity to give you an in-depth analysis of your fitness journey. Happy tracking!
