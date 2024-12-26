@@ -21,6 +21,7 @@ E.g. you can run this in project root, ideally in a dedicated python environment
 ```bash
 python3 ./src/app.py
 ```
+Please run `app.py` from the project root (like in the snippet), for the paths to be correctly selected.
 
 # App Usage
 The app consists of four sections: "Load Data" and the three Visualisations "Muscle Activity Map", "Goal/Reached Dashboard" and "Activity Type Breakdown".
