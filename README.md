@@ -22,11 +22,18 @@ pip install -r requirements.txt
 ---
 
 ## Running the App
-Once the setup is complete and all dependencies are installed, you can launch the app by running the `app.py` file with Python. Use the following command in the project root, preferably within the virtual environment:
+Once the setup is complete and all dependencies are installed, you can launch the app by running the `app.py` file with Python. 
+
+### Terminal
+Use the following command in the project root, preferably within the virtual environment:
 ```bash
-python3 src/app.py
+python3 ./src/app.py
 ```
 Ensure the script is executed from the project root to maintain correct path references.
+
+### IDE Run Button
+If you want to run it with a run button in an IDE, make sure that the run configuration is correctly configured. For example:
+![Example Pycharm Run Configuration](data/readme/Screenshot_20241226_131419.png)
 
 ---
 
@@ -35,18 +42,22 @@ The app features four primary sections: **Load Data**, and three visualizations:
 
 ### Load Data
 #### Fetch from Garmin
+#TODO
 - Use your Garmin account credentials to fetch fitness data via the Garmin API.
 - Due to API traffic regulation, data fetched will persist within the app.
 - You can download your data for offline use or to minimize API usage on other devices.
 
 #### Upload Local Dataset
+#TODO
 - Upload previously downloaded datasets via the "Upload Local Dataset" section.
 
 ### Toggle Colorblind Mode
+#TODO
 - A floating toggle button enables a colorblind-friendly mode for better accessibility.
 - Although the coloring scheme in this mode may appear less intuitive, it ensures clear distinction for users with colorblindness.
 
 ### Set Time Range
+#TODO
 - Use the time range selector to adjust the period for visualizations. If no data is available for the selected range, a message will appear within the visualization.
 
 ---
@@ -54,6 +65,7 @@ The app features four primary sections: **Load Data**, and three visualizations:
 ## Visualizations
 
 ### Muscle Activity Map
+#TODO
 #### Muscle Map
 - Displays trained muscle groups with color-coded intensity:
     - Primary muscles: **Red** (or **Blue** in colorblind mode).
@@ -65,6 +77,7 @@ The app features four primary sections: **Load Data**, and three visualizations:
 - Helps analyze the balance of your strength training in a direct, graphical manner.
 
 ### Goal/Reached Dashboard
+#TODO
 Allows you to set and track goals for various metrics measured by your Garmin watch.
 
 #### Summary View
@@ -80,6 +93,7 @@ Allows you to set and track goals for various metrics measured by your Garmin wa
 - Use the unfoldable table to set goals for various metrics, affecting both summary and single metric goals.
 
 ### Activity Type Breakdown
+#TODO
 - Displays a pie chart of your training types.
 - Customize the metrics displayed (e.g., duration, number of activities).
 
