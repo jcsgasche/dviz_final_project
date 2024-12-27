@@ -42,22 +42,21 @@ The app features four primary sections: **Load Data**, and three visualizations:
 
 ### Load Data
 #### Fetch from Garmin
-#TODO
 - Use your Garmin account credentials to fetch fitness data via the Garmin API.
 - Due to API traffic regulation, data fetched will persist within the app.
 - You can download your data for offline use or to minimize API usage on other devices.
 
 #### Upload Local Dataset
-#TODO
+![Upload Local Dataset](data/readme/data_upload.gif)
 - Upload previously downloaded datasets via the "Upload Local Dataset" section.
 
 ### Toggle Colorblind Mode
-#TODO
+![Toggle Colorblind Mode](data/readme/colorblind.gif)
 - A floating toggle button enables a colorblind-friendly mode for better accessibility.
 - Although the coloring scheme in this mode may appear less intuitive, it ensures clear distinction for users with colorblindness.
 
 ### Set Time Range
-#TODO
+![Set Time Range](data/readme/date_selection.gif)
 - Use the time range selector to adjust the period for visualizations. If no data is available for the selected range, a message will appear within the visualization.
 
 ---
@@ -65,7 +64,7 @@ The app features four primary sections: **Load Data**, and three visualizations:
 ## Visualizations
 
 ### Muscle Activity Map
-#TODO
+![Muscle Activity Map](data/readme/muscle_map.gif)
 #### Muscle Map
 - Displays trained muscle groups with color-coded intensity:
     - Primary muscles: **Red** (or **Blue** in colorblind mode).
@@ -77,7 +76,7 @@ The app features four primary sections: **Load Data**, and three visualizations:
 - Helps analyze the balance of your strength training in a direct, graphical manner.
 
 ### Goal/Reached Dashboard
-#TODO
+![Goal/Reached Dashboard](data/readme/barchart.gif)
 Allows you to set and track goals for various metrics measured by your Garmin watch.
 
 #### Summary View
@@ -93,7 +92,7 @@ Allows you to set and track goals for various metrics measured by your Garmin wa
 - Use the unfoldable table to set goals for various metrics, affecting both summary and single metric goals.
 
 ### Activity Type Breakdown
-#TODO
+![Activity Type Breakdown](data/readme/piechart.gif)
 - Displays a pie chart of your training types.
 - Customize the metrics displayed (e.g., duration, number of activities).
 
