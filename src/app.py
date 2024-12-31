@@ -105,7 +105,6 @@ navbar = dbc.Navbar(
 app.layout = html.Div([
     navbar,
     data_stores,
-    html.Div(id='data-status-container'),
     floating_controls,
     dbc.Container([
         dbc.Row([
