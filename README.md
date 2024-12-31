@@ -49,6 +49,8 @@ The app features four primary sections: **Load Data**, and three visualizations:
 #### Upload Local Dataset
 ![Upload Local Dataset](data/readme/data_upload.gif)
 - Upload previously downloaded datasets via the "Upload Local Dataset" section.
+##### Example data
+There is example data to use in the `data/activities` directory
 
 ### Toggle Colorblind Mode
 ![Toggle Colorblind Mode](data/readme/colorblind.gif)
